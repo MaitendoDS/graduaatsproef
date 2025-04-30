@@ -1,17 +1,14 @@
-// Dit gedeelte komt eerst voor de repositories en dependencies:
-allprojects {
-    repositories {
-        google()  // Zorg ervoor dat deze repository is toegevoegd
-        mavenCentral()
-    }
+buildscript {
     dependencies {
-        // Voeg deze classpath toe voor de Google services plugin
-        classpath("com.google.gms:google-services:4.3.15")  // Versie moet kloppen
+        classpath("com.google.gms:google-services:4.3.15")
+    }
+    repositories {
+        google()
+        mavenCentral()
     }
 }
 
 plugins {
-    // Voeg de Firebase Google services plugin toe
     id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
@@ -28,4 +25,13 @@ subprojects {
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://maven.google.com") }
+        maven { url = uri("https://jitpack.io") }
+    }
 }

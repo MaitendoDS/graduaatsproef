@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  intl: ^0.18.0 # Voor datum- en tijdformattering
+  firebase_core: ^2.18.0 # Voor Firebase-integratie
+  firebase_auth: ^4.9.0  # Voor authenticatie (inloggen/registreren)
+  cloud_firestore: ^4.10.0  # Voor opslag in de cloud (voor de gebruikersinstellingen)
 
 dev_dependencies:
   flutter_test:
@@ -19,4 +23,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logov1.webp
- 
