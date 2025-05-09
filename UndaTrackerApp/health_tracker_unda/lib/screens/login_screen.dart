@@ -15,8 +15,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
 
   void signIn() {
-    String email = emailController.text.trim();
-    String password = passwordController.text;
+    // String email = emailController.text.trim();
+    // String password = passwordController.text;
+      String email = "email@tester.be";
+      String password = "wachtwoord";
 
     if (email.isEmpty || password.isEmpty) {
       showError('Vul zowel je e-mailadres als wachtwoord in.');
