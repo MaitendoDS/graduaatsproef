@@ -13,7 +13,7 @@ class CalendarTab extends StatelessWidget {
     final dayDiff = date.difference(lastPeriodStart).inDays;
     final cycleDay = (dayDiff % cycleLength) + 1;
 
-    if (isSameDate(date, today)) return Colors.blueAccent;
+    if (isSameDate(date, today)) return Color.fromARGB(255, 229, 227, 114);
     if (cycleDay <= menstruationLength) return Colors.pink.shade200;
     if (cycleDay == 14) return Colors.green;
     if (cycleDay >= 12 && cycleDay <= 16) return Colors.green.shade200;

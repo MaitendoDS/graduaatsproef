@@ -89,7 +89,8 @@ class _NotificationsTabState extends State<NotificationsTab> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.pink[50],
+              color: const Color.fromARGB(255, 238, 247, 231),
+              border: Border.all(color: Colors.lightGreen.shade200),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -121,9 +122,9 @@ class _NotificationsTabState extends State<NotificationsTab> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.indigo.shade50,
+              color: const Color.fromARGB(255, 238, 247, 231),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.indigo.shade100),
+              border: Border.all(color: Colors.lightGreen.shade200),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +185,7 @@ class _NotificationsTabState extends State<NotificationsTab> {
                   icon: const Icon(Icons.add),
                   label: const Text('Herinnering toevoegen'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
+                    backgroundColor: Colors.green[300],
                     foregroundColor: Colors.white,
                   ),
                 ),

@@ -90,11 +90,11 @@ class _TrackingTabState extends State<TrackingTab> {
             ),
             calendarStyle: const CalendarStyle(
               todayDecoration: BoxDecoration(
-                color: Color.fromARGB(255, 179, 209, 221),
+                color: Color.fromARGB(255, 229, 227, 114),
                 shape: BoxShape.circle,
               ),
               selectedDecoration: BoxDecoration(
-                color: Color.fromARGB(255, 229, 227, 114),
+                color: Color.fromARGB(255, 127, 221, 250),
                 shape: BoxShape.circle,
               ),
             ),
@@ -121,7 +121,7 @@ class _TrackingTabState extends State<TrackingTab> {
                 } else if (isFertileDay(day)) {
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.lightGreen.withOpacity(0.3),
+                      color: Colors.green[100],
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
