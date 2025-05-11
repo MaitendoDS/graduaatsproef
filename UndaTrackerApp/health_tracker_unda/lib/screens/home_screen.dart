@@ -3,6 +3,7 @@ import 'tracking_tab.dart';
 import 'calendar_tab.dart';
 import 'notifications_tab.dart';
 import 'settings_tab.dart';
+import 'food_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _tabs = [
     const CalendarTab(),
     const TrackingTab(),
+    const FoodTab(),
     const NotificationsTab(),
     const SettingsTab(),
   ];
@@ -59,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onItemTapped,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
@@ -68,6 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.track_changes),
             label: 'Tracking',
           ),
+          BottomNavigationBarItem(
+          icon: Icon(Icons.restaurant),
+          label: 'Eten'),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
             label: 'Meldingen',

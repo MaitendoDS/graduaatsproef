@@ -171,7 +171,7 @@ class _TrackingTabState extends State<TrackingTab> {
                   );
                 },
                 icon: const Icon(Icons.bloodtype),
-                label: const Text('Log periode'),
+                label: const Text('Menstruatie'),
               ),
             ],
           ),
@@ -208,6 +208,38 @@ class _TrackingTabState extends State<TrackingTab> {
                 const SizedBox(height: 8),
                 Text(
                   '📍 Volgende menstruatie: ${DateFormat('d MMMM', 'nl').format(getNextPeriodStart())}',
+                ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink[100],
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) =>
+                                    MenstruationTab(selectedDay: _selectedDay),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.bloodtype, color: Colors.red),
+                      label: const Text(
+                        'Begin menstruatie!!!!!',
+                        style: TextStyle(color: Colors.black87),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

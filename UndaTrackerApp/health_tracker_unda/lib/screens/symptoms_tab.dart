@@ -14,6 +14,19 @@ class _SymptomsTabState extends State<SymptomsTab> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
+  final Map<int, String> _painDescriptions = {
+    1: "De pijn is amper merkbaar",
+    2: "De pijn is merkbaar, maar stoort mijn activiteiten niet",
+    3: "De pijn leidt me soms af",
+    4: "De pijn leidt me af, maar ik kan gewone activiteiten doen",
+    5: "De pijn onderbreekt sommige activiteiten",
+    6: "De pijn is moeilijk te negeren, ik vermijd gewone activiteiten",
+    7: "De pijn beheerst mijn aandacht, ik doe geen dagelijkse activiteiten",
+    8: "De pijn is heel erg, het is moeilijk om iets te doen",
+    9: "De pijn is niet uit te staan, niet mogelijk om iets te doen",
+    10: "De pijn kan niet erger, niets anders is van belang",
+  };
+
   TimeOfDay _selectedTime = TimeOfDay.now();
 
   final List<String> _types = ['Pijn', 'Last', 'Gevoelig'];
@@ -147,6 +160,15 @@ class _SymptomsTabState extends State<SymptomsTab> {
               ),
             ),
             Center(child: Text("Score: $_painScale")),
+            if (_painDescriptions.containsKey(_painScale))
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  _painDescriptions[_painScale]!,
+                  style: const TextStyle(fontStyle: FontStyle.italic),
+                  textAlign: TextAlign.center,
+                ),
+              ),
 
             const Text(
               "Notities:",
