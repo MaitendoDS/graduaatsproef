@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'symptoms_tab.dart';
+import 'menstruation_tab.dart';
 
 class TrackingTab extends StatefulWidget {
   const TrackingTab({super.key});
@@ -51,7 +53,8 @@ class _TrackingTabState extends State<TrackingTab> {
   }
 
   String getPregnancyChance(DateTime date) {
-    int cycleDay = (date.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
+    int cycleDay =
+        (date.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
     if (cycleDay >= 9 && cycleDay <= 14) return '🔴 Hoog (±60%)';
     if (cycleDay >= 10 && cycleDay <= 16) return '🟠 Gemiddeld (±30%)';
     return '🟢 Laag (<1%)';
@@ -107,7 +110,10 @@ class _TrackingTabState extends State<TrackingTab> {
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                    child: Text(
+                      '${day.day}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   );
                 } else if (isOvulationDay(day)) {
                   return Container(
@@ -116,7 +122,10 @@ class _TrackingTabState extends State<TrackingTab> {
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: Text('${day.day}', style: const TextStyle(color: Colors.white)),
+                    child: Text(
+                      '${day.day}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   );
                 } else if (isFertileDay(day)) {
                   return Container(
@@ -125,7 +134,10 @@ class _TrackingTabState extends State<TrackingTab> {
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: Text('${day.day}', style: const TextStyle(color: Colors.black)),
+                    child: Text(
+                      '${day.day}',
+                      style: const TextStyle(color: Colors.black),
+                    ),
                   );
                 }
                 return null;
@@ -137,12 +149,27 @@ class _TrackingTabState extends State<TrackingTab> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SymptomsTab(selectedDay: _selectedDay),
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.healing),
                 label: const Text('Symptomen'),
               ),
               ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => MenstruationTab(selectedDay: _selectedDay),
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.bloodtype),
                 label: const Text('Log periode'),
               ),
@@ -154,14 +181,19 @@ class _TrackingTabState extends State<TrackingTab> {
             decoration: BoxDecoration(
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
-              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 4),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '📅 ${DateFormat('EEEE d MMMM y', 'nl').format(_selectedDay)}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(getCycleDayLabel(_selectedDay)),
@@ -170,7 +202,9 @@ class _TrackingTabState extends State<TrackingTab> {
                   'Symptomen: ${selectedSymptoms.isNotEmpty ? selectedSymptoms.join(', ') : 'Geen'}',
                 ),
                 const SizedBox(height: 8),
-                Text('🤰 Kans op zwangerschap: ${getPregnancyChance(_selectedDay)}'),
+                Text(
+                  '🤰 Kans op zwangerschap: ${getPregnancyChance(_selectedDay)}',
+                ),
                 const SizedBox(height: 8),
                 Text(
                   '📍 Volgende menstruatie: ${DateFormat('d MMMM', 'nl').format(getNextPeriodStart())}',
