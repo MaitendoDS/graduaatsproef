@@ -7,45 +7,47 @@
 
 % Pas na deze inleidende paragraaf komt de eerste sectiehoofding.
 
-Dit hoofdstuk bevat je literatuurstudie. De inhoud gaat verder op de inleiding, maar zal het onderwerp van de graduaatsproef *diepgaand* uitspitten. De bedoeling is dat de lezer na lezing van dit hoofdstuk helemaal op de hoogte is van de huidige stand van zaken (state-of-the-art) in het onderzoeksdomein. Iemand die niet vertrouwd is met het onderwerp, weet nu voldoende om de rest van het verhaal te kunnen volgen, zonder dat die er nog andere informatie moet over opzoeken \autocite{Pollefliet2011}.
+\section{Inleiding}
 
-Je verwijst bij elke bewering die je doet, vakterm die je introduceert, enz.\ naar je bronnen. In \LaTeX{} kan dat met het commando \texttt{$\backslash${textcite\{\}}} of \texttt{$\backslash${autocite\{\}}}. Als argument van het commando geef je de ``sleutel'' van een ``record'' in een bibliografische databank in het Bib\LaTeX{}-formaat (een tekstbestand). Als je expliciet naar de auteur verwijst in de zin (narratieve referentie), gebruik je \texttt{$\backslash${}textcite\{\}}. Soms is de auteursnaam niet expliciet een onderdeel van de zin, dan gebruik je \texttt{$\backslash${}autocite\{\}} (referentie tussen haakjes). Dit gebruik je bv.~bij een citaat, of om in het bijschrift van een overgenomen afbeelding, broncode, tabel, enz. te verwijzen naar de bron. In de volgende paragraaf een voorbeeld van elk.
+In dit hoofdstuk wordt de huidige stand van zaken binnen het onderzoeksdomein van gezondheidstracking behandeld. We bespreken bestaande methoden en technologieën voor het bijhouden van gezondheidsdata, zoals menstruatiecycli, eetgewoonten, pijnregistratie en medicatie-inname. Daarnaast wordt de keuze voor Flutter als ontwikkeltool toegelicht, evenals de meerwaarde van geïntegreerde mobiele applicaties voor gebruikers met chronische aandoeningen. Dit vormt de basis voor het ontwerp en de ontwikkeling van de Unda-applicatie.
 
-\textcite{Knuth1998} schreef een van de standaardwerken over sorteer- en zoekalgoritmen. Experten zijn het erover eens dat cloud computing een interessante opportuniteit vormen, zowel voor gebruikers als voor dienstverleners op vlak van informatietechnologie~\autocite{Creeger2009}.
+\section{Gezondheidstracking in de context van chronische aandoeningen}
+Chronische aandoeningen zoals endometriose, prikkelbare darm syndroom (PDS), fibromyalgie (een chronische aandoening die zorgt voor pijn in spieren en vermoeidheid) en migraine vereisen vaak een nauwgezette opvolging van symptomen en leefstijl. Volgens de Wereldgezondheidsorganisatie (WHO) hebben digitale hulpmiddelen het potentieel om zelfzorg te bevorderen en gezondheidsuitkomsten te verbeteren \autocite{WHO2021}. Het bijhouden van gegevens zoals voeding, pijn, medicatie en menstruatiecycli stelt zowel de patiënt als de zorgverlener in staat om patronen te herkennen en behandelingen beter af te stemmen.
 
-Let er ook op: het \texttt{cite}-commando voor de punt, dus binnen de zin. Je verwijst meteen naar een bron in de eerste zin die erop gebaseerd is, dus niet pas op het einde van een paragraaf.
+\section{Bestaande gezondheidstracking-apps}
+Er bestaan al talloze gezondheidstrackers zoals:
+\begin{itemize}
+  \item \textit{Clue} en \textit{Flo}, die zich richten op menstruatiecyclus en vruchtbaarheid.
+  \item \textit{MyFitnessPal}, een voedingsdagboek en calorieënteller.
+  \item \textit{Migraine Buddy}, voor pijn- en hoofdpijnregistratie.
+  \item \textit{Medisafe}, dat medicatieherinneringen verzorgt.
+\end{itemize}
+Hoewel deze apps hun doelpubliek effectief bedienen, toont onderzoek aan dat gebruikers vaak gefrustreerd raken door het gebrek aan integratie tussen verschillende gezondheidstoepassingen \autocite{Fritz2015}. Het continu wisselen tussen apps leidt tot inconsistentie in dataverzameling en verhoogt de cognitieve belasting bij mensen die al worstelen met gezondheidsproblemen.
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{grail.jpg}
-  \caption[Voorbeeld figuur.]{\label{fig:grail}Voorbeeld van invoegen van een figuur. Zorg altijd voor een uitgebreid bijschrift dat de figuur volledig beschrijft zonder in de tekst te moeten gaan zoeken. Vergeet ook je bronvermelding niet!}
-\end{figure}
+\section{Gebrek aan centralisatie}
+Een van de voornaamste problemen met bestaande oplossingen is de fragmentatie van data. Gebruikers moeten vaak meerdere apps openen om een volledig beeld van hun gezondheid te krijgen. Deze versnippering maakt het moeilijk om verbanden te leggen tussen bijvoorbeeld voeding en pijnintensiteit of tussen de menstruatiecyclus en gemoedstoestand \autocite{Lupton2014}. 
 
-\begin{listing}
-  \begin{minted}{python}
-    import pandas as pd
-    import seaborn as sns
+Een onderzoek van \textcite{Sundstrom2016} stelt dat gebruikers van menstruatieapps vaak extra tools nodig hebben om bredere gezondheidsaspecten bij te houden. Dit geeft aan dat er behoefte is aan een geïntegreerde oplossing die meerdere aspecten van gezondheid in één systeem combineert.
 
-    penguins = sns.load_dataset('penguins')
-    sns.relplot(data=penguins, x="flipper_length_mm", y="bill_length_mm", hue="species")
-  \end{minted}
-  \caption[Voorbeeld codefragment]{Voorbeeld van het invoegen van een codefragment.}
-\end{listing}
+\section{Gebruik van pijndagboeken}
+Het gebruik van een pijnlogboek wordt door veel artsen aangeraden om triggers te identificeren en de effectiviteit van behandelingen te evalueren. Studies tonen aan dat schriftelijke rapportage vaak betrouwbaarder is dan herinneringen achteraf \autocite{Stone2002}. Digitale pijndagboeken maken het bovendien mogelijk om trends visueel weer te geven, wat zowel voor patiënt als arts zeer waardevol is.
 
-\lipsum[7-20]
+\section{Belang van gebruiksvriendelijke interface}
+Volgens \textcite{Zhao2016} is gebruiksvriendelijkheid essentieel voor het succes van een gezondheidsapp. Apps met een steile leercurve of ingewikkelde navigatie worden sneller verlaten. Flutter, de gekozen technologie voor de ontwikkeling van Unda, maakt het mogelijk om intuïtieve en visueel aantrekkelijke interfaces te bouwen voor meerdere platformen met minimale ontwikkelcomplexiteit \autocite{FlutterDocs2023}.
 
-\begin{table}
-  \centering
-  \begin{tabular}{lcr}
-    \toprule
-    \textbf{Kolom 1} & \textbf{Kolom 2} & \textbf{Kolom 3} \\
-    $\alpha$         & $\beta$          & $\gamma$         \\
-    \midrule
-    A                & 10.230           & a                \\
-    B                & 45.678           & b                \\
-    C                & 99.987           & c                \\
-    \bottomrule
-  \end{tabular}
-  \caption[Voorbeeld tabel]{\label{tab:example}Voorbeeld van een tabel.}
-\end{table}
+\section{Mobiele gezondheidstechnologie (mHealth)}
+Mobiele gezondheidstoepassingen (mHealth) hebben het potentieel om zelfmanagement van gezondheid op grote schaal te verbeteren. Volgens een rapport van IQVIA zijn er wereldwijd meer dan 350.000 gezondheidsapps beschikbaar. Toch blijkt uit systematische reviews dat slechts een fractie van deze apps gebaseerd is op evidence-based praktijken of ontwikkeld is in samenwerking met zorgverleners \autocite{Byambasuren2018}. Dit benadrukt het belang van wetenschappelijke onderbouwing en co-creatie bij de ontwikkeling van nieuwe apps zoals Unda.
 
+\section{Behoefte bij zorgverleners}
+Gesprekken met huisartsen en specialisten wijzen uit dat het nuttig is wanneer patiënten hun gegevens systematisch kunnen delen. Zorgverleners ervaren dat subjectieve klachten zoals pijn moeilijk te beoordelen zijn zonder concrete gegevens. Door deze data visueel en gestructureerd aan te bieden, kan de diagnostiek en opvolging verbeteren \autocite{Ventola2014}.
+
+\section{Flutter}
+Flutter is een open-source UI-toolkit ontwikkeld door Google, waarmee je met één enkele codebase mobiele apps kunt bouwen voor zowel iOS als Android, maar ook voor web en desktop. Het gebruikt de programmeertaal Dart, die geoptimaliseerd is voor snelle en vloeiende gebruikersinterfaces. Dankzij Flutter kunnen ontwikkelaars efficiënter werken en eenvoudig consistente, aantrekkelijke apps creëren die op meerdere platformen draaien zonder veel extra aanpassingen \autocite{GoogleFlutter}.
+
+Flutter doet mij sterk denken aan React Native, omdat beide frameworks gebruikt worden voor het bouwen van mobiele applicaties met een declaratieve aanpak. Dit betekent dat je in beide frameworks beschrijft hoe de gebruikersinterface (UI) eruit moet zien, en het framework zorgt ervoor dat die UI correct wordt weergegeven en aangepast bij veranderingen.
+
+Beide frameworks werken met componenten die in Flutter “widgets” worden genoemd en in React Native “components.” Dit lijkt sterk op elkaar: je bouwt de UI op uit kleine herbruikbare bouwstenen.
+
+Het grootste verschil zit in de onderliggende techniek: Flutter compileert zijn code direct naar native machinecode, wat meestal zorgt voor betere prestaties en een soepelere gebruikerservaring. React Native daarentegen draait op JavaScript en communiceert met native componenten via een zogenaamde “bridge”. Deze extra laag kan soms een impact hebben op de snelheid en reactietijd van de app.
+
+Kort samengevat, terwijl Flutter en React Native veel overeenkomsten hebben in hun aanpak en structuur, heeft Flutter dankzij directe compilatie naar native code vaak een performancevoordeel ten opzichte van React Native.

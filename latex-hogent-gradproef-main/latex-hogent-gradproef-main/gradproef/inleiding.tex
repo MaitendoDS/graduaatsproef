@@ -5,32 +5,56 @@
 \chapter{\IfLanguageName{dutch}{Inleiding}{Introduction}}%
 \label{ch:inleiding}
 
-De inleiding moet de lezer net genoeg informatie verschaffen om het onderwerp te begrijpen en in te zien waarom de onderzoeksvraag de moeite waard is om te onderzoeken. In de inleiding ga je literatuurverwijzingen beperken, zodat de tekst vlot leesbaar blijft. Je kan de inleiding verder onderverdelen in secties als dit de tekst verduidelijkt. Zaken die aan bod kunnen komen in de inleiding~\autocite{Pollefliet2011}:
-
-\begin{itemize}
-  \item context, achtergrond
-  \item afbakenen van het onderwerp
-  \item verantwoording van het onderwerp, methodologie
-  \item probleemstelling
-  \item onderzoeksdoelstelling
-  \item onderzoeksvraag
-  \item \ldots
-\end{itemize}
+Chronische gezondheidsproblemen vereisen vaak een actieve betrokkenheid van patiënten bij het opvolgen van hun eigen gezondheid. 
+Artsen raden vaak aan om gegevens zoals menstruatiecycli, eet- en drinkgewoonten, pijnervaringen en medicatie-inname systematisch bij te houden. 
+In de praktijk maken gebruikers hiervoor echter gebruik van meerdere apps of papieren notities, wat leidt tot een gefragmenteerd overzicht en verlies van informatie. 
+Deze versnippering belemmert het herkennen van patronen en maakt het moeilijker om relevante gegevens te delen met zorgverleners. 
+De Unda Health Tracker is ontstaan vanuit deze nood aan een centrale en gebruiksvriendelijke oplossing. De mobiele applicatie integreert meerdere vormen van gezondheidstracking in één platform. 
+Het is gericht op personen met chronische aandoeningen of hormonale schommelingen, maar ook op gezondheidsbewuste gebruikers die hun levensstijl willen monitoren. 
+Deze doelgroep heeft baat bij een duidelijke, visuele weergave van gezondheidsdata om meer inzicht te krijgen in hun klachten en evolutie. 
+Het doel van deze graduaatsproef is dan ook het ontwikkelen van een werkend prototype van deze applicatie, met aandacht voor gebruiksgemak en overzichtelijkheid. 
 
 \section{\IfLanguageName{dutch}{Probleemstelling}{Problem Statement}}%
 \label{sec:probleemstelling}
 
-Uit je probleemstelling moet duidelijk zijn dat je onderzoek een meerwaarde heeft voor een concrete doelgroep. De doelgroep moet goed gedefinieerd en afgelijnd zijn. Doelgroepen als ``bedrijven,'' ``KMO's'', systeembeheerders, enz.~zijn nog te vaag. Als je een lijstje kan maken van de personen/organisaties die een meerwaarde zullen vinden in deze bachelorproef (dit is eigenlijk je steekproefkader), dan is dat een indicatie dat de doelgroep goed gedefinieerd is. Dit kan een enkel bedrijf zijn of zelfs één persoon (je co-promotor/opdrachtgever).
+Gebruikers die medische gegevens willen bijhouden, stuiten vaak op het probleem dat ze verschillende apps 
+moeten combineren of terugvallen op handmatische notities. 
+Deze kunnen verloren raken of tot verwarring leiden. 
+Er is ook kans op verlies aan overzicht en inconsistentie in de dataregistratie. 
+Daarnaast blijkt uit gesprekken met enkele artsen dat veel patiënten moeite hebben om correcte en volledige informatie aan te leveren tijdens consultaties. 
+De huidige markt biedt voornamelijk apps die zich richten op een specifiek aspect, zoals menstruatie of voeding. 
+Er is dus een meerwaarde in het ontwikkelen van een applicatie die deze functionaliteiten combineert 
+en gebruiksvriendelijk maakt voor een afgebakende doelgroep: personen met chronische klachten of hormonale schommelingen die baat hebben bij 
+een nauwkeurige en centrale registratie van hun gezondheidsdata. 
 
 \section{\IfLanguageName{dutch}{Onderzoeksvraag}{Research question}}%
 \label{sec:onderzoeksvraag}
 
-Wees zo concreet mogelijk bij het formuleren van je onderzoeksvraag. Een onderzoeksvraag is trouwens iets waar nog niemand op dit moment een antwoord heeft (voor zover je kan nagaan). Het opzoeken van bestaande informatie (bv. ``welke tools bestaan er voor deze toepassing?'') is dus geen onderzoeksvraag. Je kan de onderzoeksvraag verder specifiëren in deelvragen. Bv.~als je onderzoek gaat over performantiemetingen, dan 
+De centrale onderzoeksvraag van deze graduaatsproef luidt:
+
+\begin{quote}
+    Hoe kan een mobiele applicatie bijdragen aan een efficiënte en overzichtelijke registratie van menstruatiecycli, voeding, pijnklachten en medicatie-inname bij gebruikers met chronische gezondheidsproblemen?
+\end{quote}
+
+Deelvragen hierbij zijn onder andere: 
+\begin{itemize}
+    \item Welke functies hebben gebruikers effectief nodig voor gezondheidstracking?
+    \item Hoe kan de interface intuïtief en laadgrempelig worden ontworpen?
+    \item Hoe kunnen de geregistreerde gegevens visueel worden weergegeven zodat ze patronen blootleggen?
+\end{itemize}
 
 \section{\IfLanguageName{dutch}{Onderzoeksdoelstelling}{Research objective}}%
 \label{sec:onderzoeksdoelstelling}
+De doelstelling van deze graduaatsproef is het ontwikkelen van een functioneel prototype van een mobiele applicatie die verschillende gezondheidstrackers integreert in één systeem. 
+De applicatie moet gebruiksvriendelijk, visueel overzichtelijk en technisch stabiel zijn. Ze moet gebruikers in staat stellen om eenvoudig hun gegevens in te voeren, trends te herkennen en informatie te exporteren of delen met hun zorgverleners.
 
-Wat is het beoogde resultaat van je graduaatsproef? Wat zijn de criteria voor succes? Beschrijf die zo concreet mogelijk. Gaat het bv.\ om een proof-of-concept, een prototype, een verslag met aanbevelingen, een vergelijkende studie, enz.
+Een succesvolle uitvoering van dit project resulteert in: 
+\begin{itemize}
+    \item Een werkende Flutter-applicatie voor Android (en optioneel iOS),
+    \item Een interface die verschillende vormen van gezondheidstracking combineert,
+    \item Een eenvoudige, duidelijke visualisatie van de ingevoerde data,
+    \item Een positieve evaluatie door minstens één arts of zorgverlener. 
+\end{itemize}
 
 \section{\IfLanguageName{dutch}{Opzet van deze graduaatsproef}{Structure of this associate thesis}}%
 \label{sec:opzet-graduaatsproef}
@@ -41,10 +65,10 @@ Wat is het beoogde resultaat van je graduaatsproef? Wat zijn de criteria voor su
 
 De rest van deze graduaatsproef is als volgt opgebouwd:
 
-In Hoofdstuk~\ref{ch:stand-van-zaken} wordt een overzicht gegeven van de stand van zaken binnen het onderzoeksdomein, op basis van een literatuurstudie.
+In Hoofdstuk~\ref{ch:stand-van-zaken} wordt op basis van literatuur en bestaande toepassigen de stand van zaken binnen het domein van gezondheidstracking besproken. 
 
 In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de gebruikte onderzoekstechnieken besproken om een antwoord te kunnen formuleren op de onderzoeksvragen.
 
 % TODO: Vul hier aan voor je eigen hoofstukken, één of twee zinnen per hoofdstuk
 
-In Hoofdstuk~\ref{ch:conclusie}, tenslotte, wordt de conclusie gegeven en een antwoord geformuleerd op de onderzoeksvragen. Daarbij wordt ook een aanzet gegeven voor toekomstig onderzoek binnen dit domein.
+In Hoofdstuk~\ref{ch:conclusie}, tenslotte, wordt een conclusie geformuleerd en een antwoord gegeven op de onderzoeksvraag. Er wordt afgesloten met suggesties voor verder onderzoek en uitbreiding van de applicatie. 

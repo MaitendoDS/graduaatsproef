@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _tabs = [
     const CalendarTab(),
     const TrackingTab(),
-    const FoodTab(),
+    // const FoodTab(),
     const NotificationsTab(),
     const SettingsTab(),
   ];
