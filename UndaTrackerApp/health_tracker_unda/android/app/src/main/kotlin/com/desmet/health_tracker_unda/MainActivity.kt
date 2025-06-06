@@ -1,4 +1,4 @@
-package com.example.health_tracker_unda
+package com.desmet.health_tracker_unda
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'screens/welcome_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
+import 'package:firebase_core/firebase_core.dart';  // firebase import erbij
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();  // Zorg ervoor dat Flutter bindings zijn geinitialiseerd
-  await initializeDateFormatting('nl'); // Initialiseer de datum formattering voor Nederlands
+  WidgetsFlutterBinding.ensureInitialized(); 
+  await initializeDateFormatting('nl');
+  await Firebase.initializeApp();  // Firebase initialiseren
   runApp(const MyApp());
 }
 

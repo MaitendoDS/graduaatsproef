@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "818579371249",
+    "project_id": "unda-e8481",
+    "storage_bucket": "unda-e8481.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818579371249:android:dde448f196c827db9d6550",
+        "android_client_info": {
+          "package_name": "com.desmet.health_tracker_unda"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_TwLDunqgTYHcE9TnQymR6VaalJF9YQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818579371249:android:d26bf157950700809d6550",
+        "android_client_info": {
+          "package_name": "com.smet.unda_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_TwLDunqgTYHcE9TnQymR6VaalJF9YQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818579371249:android:2aeeb1774653cc799d6550",
+        "android_client_info": {
+          "package_name": "com.smet.unda_tracker_fixed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_TwLDunqgTYHcE9TnQymR6VaalJF9YQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
