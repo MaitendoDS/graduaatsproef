@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-import 'screens/welcome_screen.dart';
-import 'screens/home_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
 import 'widgets/AuthGate.dart';
 
 void main() async {
@@ -24,12 +19,12 @@ class MyApp extends StatelessWidget {
       title: 'Unda Tracker',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF81C784),
-          primary: const Color(0xFF81C784),
-          secondary: const Color(0xFF388E3C),
-          surface: const Color(0xFFF1F8E9),
+          seedColor: Colors.green.shade600,
+          primary: Colors.green.shade600,
+          secondary: Colors.green.shade300,
+          surface: Colors.white,
         ),
-        scaffoldBackgroundColor: const Color(0xFFF1F8E9),
+        scaffoldBackgroundColor: Colors.white,
         useMaterial3: true,
       ),
       home: const AuthGate(), // hier toont hij ofwel login of homescreen gebaseerd op of je ingelogd bent of niet
