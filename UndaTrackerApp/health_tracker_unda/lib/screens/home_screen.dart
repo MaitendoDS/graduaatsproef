@@ -71,9 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.track_changes),
             label: 'Tracking',
           ),
-          BottomNavigationBarItem(
-          icon: Icon(Icons.restaurant),
-          label: 'Eten'),
+          // BottomNavigationBarItem(
+          // icon: Icon(Icons.restaurant),
+          // label: 'Eten'),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
             label: 'Meldingen',

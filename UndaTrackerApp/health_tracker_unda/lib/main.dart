@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'screens/welcome_screen.dart';
+import 'screens/home_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:firebase_core/firebase_core.dart';  // firebase import erbij
+
+import 'widgets/AuthGate.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); 
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   await initializeDateFormatting('nl');
-  await Firebase.initializeApp();  // Firebase initialiseren
   runApp(const MyApp());
 }
 
@@ -27,7 +32,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFF1F8E9),
         useMaterial3: true,
       ),
-      home: const WelcomeScreen(),
+      home: const AuthGate(), // hier toont hij ofwel login of homescreen gebaseerd op of je ingelogd bent of niet
     );
   }
 }

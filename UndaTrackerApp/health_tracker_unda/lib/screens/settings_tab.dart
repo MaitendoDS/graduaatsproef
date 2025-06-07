@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'welcome_screen.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -10,15 +12,53 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   int cycleLength = 28;
   int menstruationLength = 5;
   DateTime? birthDate;
   bool sexuallyActive = false;
+  bool _hasChanges = false;
 
   @override
   void initState() {
     super.initState();
-    
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+    if (doc.exists) {
+      final data = doc.data()!;
+      setState(() {
+        cycleLength = data['cycleLength'] ?? 28;
+        menstruationLength = data['menstruationLength'] ?? 5;
+        birthDate = (data['birthDate'] != null)
+            ? (data['birthDate'] as Timestamp).toDate()
+            : null;
+        sexuallyActive = data['sexuallyActive'] ?? false;
+        _hasChanges = false;
+      });
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    await _firestore.collection('users').doc(user.uid).set({
+      'cycleLength': cycleLength,
+      'menstruationLength': menstruationLength,
+      'birthDate': birthDate,
+      'sexuallyActive': sexuallyActive,
+    }, SetOptions(merge: true));
+
+    setState(() => _hasChanges = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Instellingen opgeslagen')),
+    );
   }
 
   int get age {
@@ -32,8 +72,6 @@ class _SettingsTabState extends State<SettingsTab> {
     return calculatedAge;
   }
 
-
-
   void _pickBirthDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -45,6 +83,7 @@ class _SettingsTabState extends State<SettingsTab> {
     if (picked != null) {
       setState(() {
         birthDate = picked;
+        _hasChanges = true;
       });
     }
   }
@@ -62,7 +101,6 @@ class _SettingsTabState extends State<SettingsTab> {
           ),
           TextButton(
             onPressed: () {
-              // Simuleer uitloggen: navigeer terug naar welkom-scherm
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const WelcomeScreen()),
                 (route) => false,
@@ -118,14 +156,20 @@ class _SettingsTabState extends State<SettingsTab> {
             _buildNumberField(
               label: 'Cyclusduur (dagen)',
               value: cycleLength,
-              onChanged: (val) => setState(() => cycleLength = val),
+              onChanged: (val) => setState(() {
+                cycleLength = val;
+                _hasChanges = true;
+              }),
             ),
             const SizedBox(height: 16),
 
             _buildNumberField(
               label: 'Duur menstruatie (dagen)',
               value: menstruationLength,
-              onChanged: (val) => setState(() => menstruationLength = val),
+              onChanged: (val) => setState(() {
+                menstruationLength = val;
+                _hasChanges = true;
+              }),
             ),
             const SizedBox(height: 16),
 
@@ -154,27 +198,34 @@ class _SettingsTabState extends State<SettingsTab> {
                 const Text('Seksueel actief'),
                 Switch(
                   value: sexuallyActive,
-                  onChanged: (val) => setState(() => sexuallyActive = val),
+                  onChanged: (val) => setState(() {
+                    sexuallyActive = val;
+                    _hasChanges = true;
+                  }),
                 ),
               ],
             ),
 
             const SizedBox(height: 32),
 
+            if (_hasChanges)
+              ElevatedButton.icon(
+                onPressed: _saveSettings,
+                icon: const Icon(Icons.save),
+                label: const Text('Instellingen opslaan'),
+              ),
+
+            const SizedBox(height: 12),
 
             ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Logica voor rapport
-              },
+              onPressed: () {},
               icon: const Icon(Icons.picture_as_pdf),
               label: const Text('Rapport voor huisarts'),
             ),
             const SizedBox(height: 12),
 
             ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Logica voor tips
-              },
+              onPressed: () {},
               icon: const Icon(Icons.lightbulb),
               label: const Text('Tips'),
             ),

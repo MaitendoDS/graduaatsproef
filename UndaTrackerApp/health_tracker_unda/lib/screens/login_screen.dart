@@ -1,5 +1,6 @@
-import 'home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,44 +10,28 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+  Future<void> _login() async {
+    try {
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-  void signIn() {
-    // String email = emailController.text.trim();
-    // String password = passwordController.text;
-      String email = "email@tester.be";
-      String password = "wachtwoord";
-
-    if (email.isEmpty || password.isEmpty) {
-      showError('Vul zowel je e-mailadres als wachtwoord in.');
-    } else if (!emailRegex.hasMatch(email)) {
-      showError('Voer een geldig e-mailadres in.');
-    } else {
-      // Alles is in orde, navigeer naar HomeScreen
+      print('Ingelogd als: ${userCredential.user?.email}'); // 👈 Console log
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
+    } on FirebaseAuthException catch (e) {
+      print('Fout bij inloggen: ${e.message}'); // 👈 Console log
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fout bij inloggen: ${e.message}')),
+      );
     }
-  }
-
-  void showError(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Fout'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -54,25 +39,20 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Inloggen')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: emailController,
+              controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
             ),
             TextField(
-              controller: passwordController,
-              obscureText: true,
+              controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Wachtwoord'),
+              obscureText: true,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: signIn,
-              child: const Text('Inloggen'),
-            ),
+            ElevatedButton(onPressed: _login, child: const Text('Inloggen')),
           ],
         ),
       ),

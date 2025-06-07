@@ -13,6 +13,7 @@ dependencies:
   table_calendar: ^3.0.9
   firebase_auth: ^4.2.5
   firebase_core: ^2.10.0
+  cloud_firestore: ^4.15.5
 
 
 dev_dependencies:
