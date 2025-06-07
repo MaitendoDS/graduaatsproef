@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:health_tracker_unda/models/cycle_calculator.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../models/cycle_calculator.dart';
 import '../widgets/action_buttons.dart';
 import '../widgets/calendar_legend.dart';
 import '../widgets/day_info_card.dart';
@@ -20,6 +20,14 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late CycleCalculator _cycleCalculator;
+
+  // Filters voor wat er getoond wordt in de kalender
+  Map<String, bool> _calendarFilters = {
+    'menstruation': true,
+    'ovulation': true,
+    'fertile': true,
+    'symptoms': true, 
+  };
 
   @override
   void initState() {
@@ -45,6 +53,13 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
     super.dispose();
   }
 
+  //functie om filters aan/uit te zetten
+  void _toggleFilter(String filterKey) {
+    setState(() {
+      _calendarFilters[filterKey] = !_calendarFilters[filterKey]!;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +71,10 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
             children: [
               _buildHeader(),
               const SizedBox(height: 20),
-              CalendarLegend(),
+              CalendarLegend(
+                filters: _calendarFilters,
+                onFilterToggle: _toggleFilter,
+              ),
               const SizedBox(height: 20),
               _buildCalendar(),
               const SizedBox(height: 20),
@@ -177,11 +195,11 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
         calendarStyle: CalendarStyle(
           outsideDaysVisible: false,
           todayDecoration: BoxDecoration(
-            color: Colors.amber.shade400,
+            color: Colors.purple.withOpacity(0.3),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.amber.withOpacity(0.3),
+                color: Colors.purpleAccent.withOpacity(0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -201,7 +219,8 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
         ),
         calendarBuilders: CalendarBuilders(
           defaultBuilder: (context, day, focusedDay) {
-            return _cycleCalculator.buildCalendarDay(day);
+            // Geef filters door aan buildCalendarDay
+            return _cycleCalculator.buildCalendarDay(day, _calendarFilters);
           },
         ),
       ),

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class CycleCalculator {
@@ -28,9 +27,10 @@ class CycleCalculator {
     return cycleDay >= 10 && cycleDay <= 15;
   }
 
-  bool isPreMenstrualDay(DateTime day) {
-    int cycleDay = (day.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
-    return cycleDay >= 25 && cycleDay <= 28;
+  // functie om te checken of een dag symptomen heeft
+  bool hasSymptoms(DateTime day) {
+    List<String> symptoms = getSymptomsForDay(day);
+    return symptoms.isNotEmpty;
   }
 
   List<String> getSymptomsForDay(DateTime day) {
@@ -42,7 +42,7 @@ class CycleCalculator {
   String getCycleDayLabel(DateTime date) {
     int dayDiff = date.difference(_lastPeriodStart).inDays;
     int cycleDay = (dayDiff % _cycleLength) + 1;
-    
+
     if (cycleDay <= _menstruationLength) {
       return 'Menstruatiedag $cycleDay';
     } else if (cycleDay >= 10 && cycleDay <= 15) {
@@ -58,7 +58,7 @@ class CycleCalculator {
 
   String getPhaseDescription(DateTime date) {
     int cycleDay = (date.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
-    
+
     if (cycleDay <= _menstruationLength) {
       return 'Je menstruatie is bezig. Zorg goed voor jezelf!';
     } else if (cycleDay >= 10 && cycleDay <= 15) {
@@ -100,20 +100,49 @@ class CycleCalculator {
     return getNextPeriodStart(selectedDay).difference(selectedDay).inDays;
   }
 
-  Widget? buildCalendarDay(DateTime day) {
-    if (isMenstruationDay(day)) {
+  bool isToday(DateTime day) {
+    final now = DateTime.now();
+    return day.year == now.year && day.month == now.month && day.day == now.day;
+  }
+
+  // buildCalendarDay accepteert nu filters
+  Widget? buildCalendarDay(DateTime day, Map<String, bool> filters) {
+    bool hasSymptomsToday = hasSymptoms(day);
+    bool isMenstruation = isMenstruationDay(day);
+    bool isOvulation = isOvulationDay(day);
+    bool isFertile = isFertileDay(day);
+    bool isTodayFlag = isToday(day);
+
+    if (isTodayFlag) {
+      return _buildCalendarDayContainer(
+        day: day,
+        color: Colors.lightBlue.shade100,
+        icon: Icons.star,
+        textColor: Colors.black,
+        isToday: true,
+        showSymptomsIcon: hasSymptomsToday && (filters['symptoms'] ?? true),
+      );
+    }
+
+    if (isMenstruation && (filters['menstruation'] ?? true)) {
       return _buildCalendarDayContainer(
         day: day,
         color: Colors.pinkAccent,
         icon: Icons.water_drop,
+        showSymptomsIcon: hasSymptomsToday && (filters['symptoms'] ?? true),
       );
-    } else if (isOvulationDay(day)) {
+    }
+
+    if (isOvulation && (filters['ovulation'] ?? true)) {
       return _buildCalendarDayContainer(
         day: day,
         color: Colors.green,
         icon: Icons.favorite,
+        showSymptomsIcon: hasSymptomsToday && (filters['symptoms'] ?? true),
       );
-    } else if (isFertileDay(day)) {
+    }
+
+    if (isFertile && (filters['fertile'] ?? true)) {
       return _buildCalendarDayContainer(
         day: day,
         color: Colors.green.shade100,
@@ -121,17 +150,22 @@ class CycleCalculator {
         textColor: Colors.green.shade700,
         hasBorder: true,
         borderColor: Colors.green.shade300,
-      );
-    } else if (isPreMenstrualDay(day)) {
-      return _buildCalendarDayContainer(
-        day: day,
-        color: Colors.purple.shade100,
-        icon: Icons.schedule,
-        textColor: Colors.purple.shade700,
-        hasBorder: true,
-        borderColor: Colors.purple.shade300,
+        showSymptomsIcon: hasSymptomsToday && (filters['symptoms'] ?? true),
       );
     }
+
+
+    // Als er geen fase maar wel symptomen zijn en symptomen filter aan
+    if (hasSymptomsToday && (filters['symptoms'] ?? true)) {
+      return _buildCalendarDayContainer(
+        day: day,
+        color: Colors.orange.shade300,
+        icon: Icons.healing,
+        textColor: Colors.white,
+        showSymptomsIcon: false, // want al symptoom icoon = hoofdicoon hier
+      );
+    }
+    
     return null;
   }
 
@@ -142,41 +176,65 @@ class CycleCalculator {
     Color textColor = Colors.white,
     bool hasBorder = false,
     Color? borderColor,
+    bool isToday = false,
+    bool showSymptomsIcon = false,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: hasBorder && borderColor != null
-            ? Border.all(color: borderColor, width: 1)
-            : null,
-        boxShadow: !hasBorder ? [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ] : null,
-      ),
+    return Stack(
       alignment: Alignment.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: hasBorder ? 10 : 12,
-            color: textColor,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isToday
+                  ? Colors.blue.shade700
+                  : hasBorder
+                      ? (borderColor ?? Colors.transparent)
+                      : Colors.transparent,
+              width: isToday
+                  ? 2
+                  : hasBorder
+                      ? 1
+                      : 0,
+            ),
+            boxShadow: isToday
+                ? [
+                    BoxShadow(
+                      color: Colors.blue.shade100,
+                      blurRadius: 6,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
           ),
-          Text(
-            '${day.day}',
-            style: TextStyle(
-              color: textColor,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 12, color: textColor),
+              Text(
+                '${day.day}',
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (showSymptomsIcon)
+          Positioned(
+            top: 2,
+            right: 2,
+            child: Icon(
+              Icons.healing,
+              size: 10,
+              color: Colors.orange.shade900,
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 }
