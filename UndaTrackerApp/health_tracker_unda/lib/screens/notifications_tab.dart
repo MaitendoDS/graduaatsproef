@@ -95,7 +95,7 @@ class _NotificationsTabState extends State<NotificationsTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade50,
+      backgroundColor: Colors.grey.shade50,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

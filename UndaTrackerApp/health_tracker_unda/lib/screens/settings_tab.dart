@@ -57,7 +57,12 @@ class _SettingsTabState extends State<SettingsTab> {
 
     setState(() => _hasChanges = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Instellingen opgeslagen')),
+      SnackBar(
+        content: const Text('Instellingen opgeslagen'),
+        backgroundColor: Colors.green.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
@@ -79,6 +84,17 @@ class _SettingsTabState extends State<SettingsTab> {
       initialDate: birthDate ?? DateTime(now.year - 20),
       firstDate: DateTime(1900),
       lastDate: now,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.green.shade400,
+              onPrimary: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -92,20 +108,31 @@ class _SettingsTabState extends State<SettingsTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Uitloggen'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade400),
+            const SizedBox(width: 8),
+            const Text('Uitloggen'),
+          ],
+        ),
         content: const Text('Weet je zeker dat je wilt uitloggen?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annuleer'),
+            child: Text('Annuleer', style: TextStyle(color: Colors.grey.shade600)),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const WelcomeScreen()),
                 (route) => false,
               );
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Uitloggen'),
           ),
         ],
@@ -115,129 +142,504 @@ class _SettingsTabState extends State<SettingsTab> {
 
   Widget _buildNumberField({
     required String label,
+    required String subtitle,
+    required IconData icon,
     required int value,
     required Function(int) onChanged,
   }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label),
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.remove),
-              onPressed: () => onChanged((value > 1) ? value - 1 : value),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.green.shade100,
+              borderRadius: BorderRadius.circular(8),
             ),
-            Text(value.toString()),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => onChanged(value + 1),
+            child: Icon(icon, color: Colors.green.shade400),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.green.shade300),
+                  ),
+                  child: const Icon(Icons.remove, size: 16),
+                ),
+                onPressed: () => onChanged((value > 1) ? value - 1 : value),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.shade300),
+                ),
+                child: Text(
+                  value.toString(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.green.shade300),
+                  ),
+                  child: const Icon(Icons.add, size: 16),
+                ),
+                onPressed: () => onChanged(value + 1),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateField() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.purple.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.purple.shade200),
+      ),
+      child: InkWell(
+        onTap: _pickBirthDate,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.purple.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.cake, color: Colors.purple.shade400),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Geboortedatum',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Leeftijd: ${age > 0 ? '$age jaar' : 'Niet ingesteld'}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.purple.shade300),
+              ),
+              child: Text(
+                birthDate != null
+                    ? DateFormat('dd-MM-yyyy').format(birthDate!)
+                    : 'Kies datum',
+                style: TextStyle(
+                  color: birthDate != null ? Colors.black : Colors.purple.shade400,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildSwitchField() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: sexuallyActive ? Colors.pink.shade50 : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: sexuallyActive ? Colors.pink.shade200 : Colors.grey.shade200,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: sexuallyActive ? Colors.pink.shade100 : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.favorite,
+              color: sexuallyActive ? Colors.pink.shade400 : Colors.grey.shade400,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Seksueel actief',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Voor nauwkeurigere voorspellingen',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: sexuallyActive,
+            onChanged: (val) => setState(() {
+              sexuallyActive = val;
+              _hasChanges = true;
+            }),
+            activeColor: Colors.pink.shade400,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Instellingen',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-
-            _buildNumberField(
-              label: 'Cyclusduur (dagen)',
-              value: cycleLength,
-              onChanged: (val) => setState(() {
-                cycleLength = val;
-                _hasChanges = true;
-              }),
-            ),
-            const SizedBox(height: 16),
-
-            _buildNumberField(
-              label: 'Duur menstruatie (dagen)',
-              value: menstruationLength,
-              onChanged: (val) => setState(() {
-                menstruationLength = val;
-                _hasChanges = true;
-              }),
-            ),
-            const SizedBox(height: 16),
-
-            GestureDetector(
-              onTap: _pickBirthDate,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            const SizedBox(height: 20),
+            
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.green.shade300, Colors.green.shade400],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.shade200.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Geboortedatum'),
+                  Row(
+                    children: [
+                      const Icon(Icons.settings, color: Colors.white, size: 28),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Instellingen',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Text(
-                    birthDate != null
-                        ? DateFormat('dd-MM-yyyy').format(birthDate!)
-                        : 'Kies datum',
-                    style: const TextStyle(color: Colors.blue),
+                    'Personaliseer je app-ervaring',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text('Leeftijd: ${age > 0 ? '$age jaar' : 'Niet ingesteld'}'),
-            const SizedBox(height: 16),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Seksueel actief'),
-                Switch(
-                  value: sexuallyActive,
-                  onChanged: (val) => setState(() {
-                    sexuallyActive = val;
-                    _hasChanges = true;
-                  }),
-                ),
-              ],
-            ),
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 32),
-
-            if (_hasChanges)
-              ElevatedButton.icon(
-                onPressed: _saveSettings,
-                icon: const Icon(Icons.save),
-                label: const Text('Instellingen opslaan'),
+            // Cyclus instellingen
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-
-            const SizedBox(height: 12),
-
-            ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.picture_as_pdf),
-              label: const Text('Rapport voor huisarts'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.refresh, color: Colors.green.shade400),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Cyclusinstellingen',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  _buildNumberField(
+                    label: 'Cyclusduur',
+                    subtitle: 'Gemiddelde lengte van je cyclus',
+                    icon: Icons.calendar_month,
+                    value: cycleLength,
+                    onChanged: (val) => setState(() {
+                      cycleLength = val;
+                      _hasChanges = true;
+                    }),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  _buildNumberField(
+                    label: 'Duur menstruatie',
+                    subtitle: 'Aantal dagen van je menstruatie',
+                    icon: Icons.circle,
+                    value: menstruationLength,
+                    onChanged: (val) => setState(() {
+                      menstruationLength = val;
+                      _hasChanges = true;
+                    }),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
 
-            ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.lightbulb),
-              label: const Text('Tips'),
+            const SizedBox(height: 24),
+
+            // Persoonlijke informatie
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.person, color: Colors.purple.shade400),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Persoonlijke informatie',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  _buildDateField(),
+                  
+                  const SizedBox(height: 12),
+                  
+                  _buildSwitchField(),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
 
-            ElevatedButton.icon(
-              onPressed: _showLogoutDialog,
-              icon: const Icon(Icons.logout),
-              label: const Text('Log uit'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red[400],
-                foregroundColor: Colors.white,
+            const SizedBox(height: 24),
+
+            // Acties
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.dashboard, color: Colors.orange.shade400),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Acties',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  if (_hasChanges) ...[
+                    _buildActionButton(
+                      label: 'Instellingen opslaan',
+                      icon: Icons.save,
+                      color: Colors.green.shade400,
+                      onPressed: _saveSettings,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  
+                  _buildActionButton(
+                    label: 'Rapport voor huisarts',
+                    icon: Icons.picture_as_pdf,
+                    color: Colors.teal.shade300,
+                    onPressed: () {},
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  _buildActionButton(
+                    label: 'Tips',
+                    icon: Icons.lightbulb,
+                    color: Colors.amber.shade300,
+                    onPressed: () {},
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  _buildActionButton(
+                    label: 'Log uit',
+                    icon: Icons.logout,
+                    color: Colors.red.shade400,
+                    onPressed: _showLogoutDialog,
+                  ),
+                ],
               ),
             ),
           ],
