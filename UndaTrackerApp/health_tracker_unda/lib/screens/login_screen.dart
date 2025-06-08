@@ -21,13 +21,13 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      print('Ingelogd als: ${userCredential.user?.email}'); // 👈 Console log
+      print('Ingelogd als: ${userCredential.user?.email}'); // Console log
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } on FirebaseAuthException catch (e) {
-      print('Fout bij inloggen: ${e.message}'); // 👈 Console log
+      print('Fout bij inloggen: ${e.message}'); //  Console log
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Fout bij inloggen: ${e.message}')),
       );

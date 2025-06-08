@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:health_tracker_unda/widgets/app_header.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -66,9 +67,9 @@ class _SymptomsTabState extends State<SymptomsTab> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Geen gebruiker ingelogd")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Geen gebruiker ingelogd")));
       return;
     }
 
@@ -80,9 +81,9 @@ class _SymptomsTabState extends State<SymptomsTab> {
     }
 
     if (_locationController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Vul een locatie in")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Vul een locatie in")));
       return;
     }
 
@@ -129,7 +130,10 @@ class _SymptomsTabState extends State<SymptomsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('EEEE d MMMM y', 'nl').format(widget.selectedDay);
+    final formattedDate = DateFormat(
+      'EEEE d MMMM y',
+      'nl',
+    ).format(widget.selectedDay);
     final tijdFormatted = DateFormat.Hm().format(
       DateTime(
         widget.selectedDay.year,
@@ -154,51 +158,10 @@ class _SymptomsTabState extends State<SymptomsTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.green.shade300, Colors.green.shade400],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.green.shade200.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.health_and_safety, color: Colors.white, size: 28),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Nieuw symptoom',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    formattedDate,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ],
-              ),
+            AppHeader(
+              title: 'Nieuw symptoom',
+              subtitle: formattedDate,
+              icon: Icons.health_and_safety,
             ),
 
             const SizedBox(height: 24),
@@ -229,7 +192,10 @@ class _SymptomsTabState extends State<SymptomsTab> {
                           color: Colors.orange.shade100,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.location_on, color: Colors.orange.shade400),
+                        child: Icon(
+                          Icons.location_on,
+                          color: Colors.orange.shade400,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -259,7 +225,7 @@ class _SymptomsTabState extends State<SymptomsTab> {
                         borderSide: BorderSide(color: Colors.orange.shade400),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, 
+                        horizontal: 16,
                         vertical: 12,
                       ),
                     ),
@@ -296,7 +262,10 @@ class _SymptomsTabState extends State<SymptomsTab> {
                           color: Colors.purple.shade100,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.category, color: Colors.purple.shade400),
+                        child: Icon(
+                          Icons.category,
+                          color: Colors.purple.shade400,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -311,25 +280,33 @@ class _SymptomsTabState extends State<SymptomsTab> {
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 10,
-                    children: _types.map((type) {
-                      final isSelected = _selectedType == type;
-                      return ChoiceChip(
-                        label: Text(
-                          type,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.purple.shade600,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        selected: isSelected,
-                        onSelected: (_) => setState(() => _selectedType = type),
-                        selectedColor: Colors.purple.shade400,
-                        backgroundColor: Colors.purple.shade50,
-                        side: BorderSide(
-                          color: isSelected ? Colors.purple.shade400 : Colors.purple.shade200,
-                        ),
-                      );
-                    }).toList(),
+                    children:
+                        _types.map((type) {
+                          final isSelected = _selectedType == type;
+                          return ChoiceChip(
+                            label: Text(
+                              type,
+                              style: TextStyle(
+                                color:
+                                    isSelected
+                                        ? Colors.white
+                                        : Colors.purple.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            selected: isSelected,
+                            onSelected:
+                                (_) => setState(() => _selectedType = type),
+                            selectedColor: Colors.purple.shade400,
+                            backgroundColor: Colors.purple.shade50,
+                            side: BorderSide(
+                              color:
+                                  isSelected
+                                      ? Colors.purple.shade400
+                                      : Colors.purple.shade200,
+                            ),
+                          );
+                        }).toList(),
                   ),
                 ],
               ),
@@ -363,7 +340,10 @@ class _SymptomsTabState extends State<SymptomsTab> {
                           color: Colors.green.shade100,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.access_time, color: Colors.green.shade400),
+                        child: Icon(
+                          Icons.access_time,
+                          color: Colors.green.shade400,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -381,7 +361,7 @@ class _SymptomsTabState extends State<SymptomsTab> {
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16, 
+                        horizontal: 16,
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
@@ -401,7 +381,11 @@ class _SymptomsTabState extends State<SymptomsTab> {
                             ),
                           ),
                           const Spacer(),
-                          Icon(Icons.edit, color: Colors.green.shade400, size: 20),
+                          Icon(
+                            Icons.edit,
+                            color: Colors.green.shade400,
+                            size: 20,
+                          ),
                         ],
                       ),
                     ),
@@ -435,18 +419,20 @@ class _SymptomsTabState extends State<SymptomsTab> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: _painScale <= 3
-                              ? Colors.green.shade100
-                              : _painScale <= 7
+                          color:
+                              _painScale <= 3
+                                  ? Colors.green.shade100
+                                  : _painScale <= 7
                                   ? Colors.orange.shade100
                                   : Colors.red.shade100,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
                           Icons.trending_up,
-                          color: _painScale <= 3
-                              ? Colors.green.shade400
-                              : _painScale <= 7
+                          color:
+                              _painScale <= 3
+                                  ? Colors.green.shade400
+                                  : _painScale <= 7
                                   ? Colors.orange.shade400
                                   : Colors.red.shade400,
                         ),
@@ -472,19 +458,23 @@ class _SymptomsTabState extends State<SymptomsTab> {
                   const SizedBox(height: 8),
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: _painScale <= 3
-                          ? Colors.green.shade400
-                          : _painScale <= 7
+                      activeTrackColor:
+                          _painScale <= 3
+                              ? Colors.green.shade400
+                              : _painScale <= 7
                               ? Colors.orange.shade400
                               : Colors.red.shade400,
-                      thumbColor: _painScale <= 3
-                          ? Colors.green.shade400
-                          : _painScale <= 7
+                      thumbColor:
+                          _painScale <= 3
+                              ? Colors.green.shade400
+                              : _painScale <= 7
                               ? Colors.orange.shade400
                               : Colors.red.shade400,
                       inactiveTrackColor: Colors.grey.shade300,
                       trackHeight: 6,
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 12,
+                      ),
                     ),
                     child: Slider(
                       value: _painScale.toDouble(),
@@ -503,18 +493,20 @@ class _SymptomsTabState extends State<SymptomsTab> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: (_painScale <= 3
+                      color:
+                          (_painScale <= 3
                               ? Colors.green.shade50
                               : _painScale <= 7
-                                  ? Colors.orange.shade50
-                                  : Colors.red.shade50),
+                              ? Colors.orange.shade50
+                              : Colors.red.shade50),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: (_painScale <= 3
+                        color:
+                            (_painScale <= 3
                                 ? Colors.green.shade200
                                 : _painScale <= 7
-                                    ? Colors.orange.shade200
-                                    : Colors.red.shade200),
+                                ? Colors.orange.shade200
+                                : Colors.red.shade200),
                       ),
                     ),
                     child: Column(
@@ -524,9 +516,10 @@ class _SymptomsTabState extends State<SymptomsTab> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: _painScale <= 3
-                                ? Colors.green.shade700
-                                : _painScale <= 7
+                            color:
+                                _painScale <= 3
+                                    ? Colors.green.shade700
+                                    : _painScale <= 7
                                     ? Colors.orange.shade700
                                     : Colors.red.shade700,
                           ),
@@ -577,7 +570,10 @@ class _SymptomsTabState extends State<SymptomsTab> {
                           color: Colors.teal.shade100,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.note_alt, color: Colors.teal.shade400),
+                        child: Icon(
+                          Icons.note_alt,
+                          color: Colors.teal.shade400,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -624,10 +620,7 @@ class _SymptomsTabState extends State<SymptomsTab> {
                 icon: const Icon(Icons.check, size: 20),
                 label: const Text(
                   "Symptoom opslaan",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade400,
@@ -641,7 +634,7 @@ class _SymptomsTabState extends State<SymptomsTab> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),
