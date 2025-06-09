@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
 import '../models/cycle_calculator.dart';
-import '../widgets/action_buttons.dart';
-import '../widgets/calendar_legend.dart';
+import '../widgets/buttons/action_buttons.dart';
+import '../widgets/calendars/calendar_legend.dart';
+import '../widgets/calendars/tracking_calendar.dart';
 import '../widgets/day_info_card.dart';
+import '../widgets/headers/cycle_header.dart';
 import 'symptoms_tab.dart';
 import 'menstruation_tab.dart';
 
@@ -20,6 +21,7 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late CycleCalculator _cycleCalculator;
+  bool _isInitializing = true;
 
   // Filters voor wat er getoond wordt in de kalender
   Map<String, bool> _calendarFilters = {
@@ -32,7 +34,22 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+    _initializeCalculator();
+    _setupAnimations();
+  }
+
+  Future<void> _initializeCalculator() async {
     _cycleCalculator = CycleCalculator();
+    await _cycleCalculator.initialize();
+    
+    setState(() {
+      _isInitializing = false;
+    });
+    
+    _animationController.forward();
+  }
+
+  void _setupAnimations() {
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -44,7 +61,6 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    _animationController.forward();
   }
 
   @override
@@ -53,195 +69,141 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
     super.dispose();
   }
 
-  //functie om filters aan/uit te zetten
   void _toggleFilter(String filterKey) {
     setState(() {
       _calendarFilters[filterKey] = !_calendarFilters[filterKey]!;
     });
   }
 
+  void _onDaySelected(DateTime selected, DateTime focused) {
+    setState(() {
+      _selectedDay = selected;
+      _focusedDay = focused;
+    });
+    _animationController.reset();
+    _animationController.forward();
+  }
+
+  void _onPageChanged(DateTime focusedDay) {
+    setState(() {
+      _focusedDay = focusedDay;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+    if (_isInitializing) {
+      return Scaffold(
+        backgroundColor: Colors.grey.shade50,
+        body: const Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildHeader(),
-              const SizedBox(height: 20),
-              CalendarLegend(
-                filters: _calendarFilters,
-                onFilterToggle: _toggleFilter,
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.pink),
               ),
-              const SizedBox(height: 20),
-              _buildCalendar(),
-              const SizedBox(height: 20),
-              ActionButtons(
-                selectedDay: _selectedDay,
-                onSymptomsPressed: () => _navigateToSymptoms(),
-                onMenstruationPressed: () => _navigateToMenstruation(),
-              ),
-              const SizedBox(height: 20),
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: DayInfoCard(
-                  selectedDay: _selectedDay,
-                  cycleCalculator: _cycleCalculator,
-                  onMenstruationPressed: () => _navigateToMenstruation(),
+              SizedBox(height: 16),
+              Text(
+                'Cyclus gegevens laden...',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildHeader() {
-    final daysUntilPeriod = _cycleCalculator.getDaysUntilNextPeriod(_selectedDay);
-    
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.pink.shade100, Colors.purple.shade100],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.calendar_today,
-            size: 32,
-            color: Colors.pink,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        color: Colors.pink,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Cyclus Tracker',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                CycleHeaderWidget(
+                  selectedDay: _selectedDay,
+                  cycleCalculator: _cycleCalculator,
                 ),
-                Text(
-                  daysUntilPeriod > 0 
-                      ? '$daysUntilPeriod dagen tot volgende menstruatie'
-                      : 'Menstruatie kan elk moment beginnen',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
+                const SizedBox(height: 20),
+                CalendarLegend(
+                  filters: _calendarFilters,
+                  onFilterToggle: _toggleFilter,
+                ),
+                const SizedBox(height: 20),
+                TrackerCalendarWidget(
+                  focusedDay: _focusedDay,
+                  selectedDay: _selectedDay,
+                  cycleCalculator: _cycleCalculator,
+                  calendarFilters: _calendarFilters,
+                  onDaySelected: _onDaySelected,
+                  onPageChanged: _onPageChanged,
+                ),
+                const SizedBox(height: 20),
+                ActionButtons(
+                  selectedDay: _selectedDay,
+                  onSymptomsPressed: _navigateToSymptoms,
+                  onMenstruationPressed: _navigateToMenstruation,
+                ),
+                const SizedBox(height: 20),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: EnhancedDayInfoCard(
+                    selectedDay: _selectedDay,
+                    cycleCalculator: _cycleCalculator,
+                    onMenstruationPressed: _navigateToMenstruation,
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: TableCalendar(
-        locale: 'nl',
-        focusedDay: _focusedDay,
-        firstDay: DateTime(2000),
-        lastDay: DateTime(2100),
-        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-        onDaySelected: (selected, focused) {
-          setState(() {
-            _selectedDay = selected;
-            _focusedDay = focused;
-          });
-          _animationController.reset();
-          _animationController.forward();
-        },
-        headerStyle: HeaderStyle(
-          formatButtonVisible: false,
-          titleCentered: true,
-          titleTextStyle: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-          leftChevronIcon: Icon(
-            Icons.chevron_left,
-            color: Colors.pink.shade400,
-          ),
-          rightChevronIcon: Icon(
-            Icons.chevron_right,
-            color: Colors.pink.shade400,
-          ),
-        ),
-        calendarStyle: CalendarStyle(
-          outsideDaysVisible: false,
-          todayDecoration: BoxDecoration(
-            color: Colors.purple.withOpacity(0.3),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.purpleAccent.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          selectedDecoration: BoxDecoration(
-            color: Colors.blue.shade400,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.blue.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-        ),
-        calendarBuilders: CalendarBuilders(
-          defaultBuilder: (context, day, focusedDay) {
-            // Geef filters door aan buildCalendarDay
-            return _cycleCalculator.buildCalendarDay(day, _calendarFilters);
-          },
         ),
       ),
     );
   }
 
-  void _navigateToSymptoms() {
-    Navigator.push(
+  Future<void> _refreshData() async {
+    await _initializeCalculator();
+    
+    // Reload calendar data for current month
+    DateTime firstDay = DateTime(_focusedDay.year, _focusedDay.month, 1);
+    DateTime lastDay = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
+    await _cycleCalculator.loadDataForDateRange(firstDay, lastDay);
+    
+    setState(() {});
+  }
+
+  void _navigateToSymptoms() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => SymptomsTab(selectedDay: _selectedDay),
       ),
     );
+    
+    // Refresh data if something was changed
+    if (result == true) {
+      await _refreshData();
+    }
   }
 
-  void _navigateToMenstruation() {
-    Navigator.push(
+  void _navigateToMenstruation() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => MenstruationTab(selectedDay: _selectedDay),
       ),
     );
+    
+    // Refresh data if something was changed
+    if (result == true) {
+      await _refreshData();
+    }
   }
 }

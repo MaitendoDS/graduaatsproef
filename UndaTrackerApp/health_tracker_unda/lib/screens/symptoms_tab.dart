@@ -1,10 +1,10 @@
 
 import 'package:flutter/material.dart';
-import 'package:health_tracker_unda/widgets/app_header.dart';
+import 'package:health_tracker_unda/widgets/headers/app_header.dart';
 import 'package:intl/intl.dart';
 import '../models/symptom_data.dart';
 import '../services/symptom_service.dart';
-import '../widgets/buttons.dart';
+import '../widgets/buttons/buttons.dart';
 import '../widgets/symptom_form.dart';
 
 class SymptomsTab extends StatefulWidget {

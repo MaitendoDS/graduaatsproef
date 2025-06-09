@@ -1,50 +1,102 @@
 import 'package:flutter/material.dart';
 
+import '../services/tracking_service.dart';
+
+
 class CycleCalculator {
+  final FirestoreService _firestoreService = FirestoreService();
+  
   int _cycleLength = 28;
   int _menstruationLength = 5;
-  DateTime _lastPeriodStart = DateTime.now().subtract(const Duration(days: 1));
-
+  DateTime? _lastPeriodStart;
+  
+  // Cache for symptoms and menstruation data
+  Map<String, List<Map<String, dynamic>>> _symptomsCache = {};
+  Map<String, Map<String, dynamic>> _menstruationCache = {};
+  
   // Getters
   int get cycleLength => _cycleLength;
   int get menstruationLength => _menstruationLength;
-  DateTime get lastPeriodStart => _lastPeriodStart;
+  DateTime? get lastPeriodStart => _lastPeriodStart;
 
-  // Cycle detection functies
+  // Initialize with user data from Firestore
+  Future<void> initialize() async {
+    final userData = await _firestoreService.getUserCycleData();
+    if (userData != null) {
+      _cycleLength = userData['cycleLength'] ?? 28;
+      _menstruationLength = userData['menstruationLength'] ?? 5;
+    }
+    
+    // Get the most recent menstruation start date
+    final menstruationDates = await _firestoreService.getAllMenstruationDates();
+    if (menstruationDates.isNotEmpty) {
+      _lastPeriodStart = menstruationDates.first;
+    } else {
+      _lastPeriodStart = DateTime.now().subtract(const Duration(days: 8));
+    }
+  }
+
+  // Load data for calendar display
+  Future<void> loadDataForDateRange(DateTime startDate, DateTime endDate) async {
+    _symptomsCache = await _firestoreService.getSymptomsForDateRange(startDate, endDate);
+    _menstruationCache = await _firestoreService.getMenstruationForDateRange(startDate, endDate);
+  }
+
+  // Check if day has menstruation data from Firestore
   bool isMenstruationDay(DateTime day) {
-    int daysSinceLastPeriod = day.difference(_lastPeriodStart).inDays;
+    String dateKey = '${day.year}-${day.month}-${day.day}';
+    return _menstruationCache.containsKey(dateKey);
+  }
+
+  // Predicted menstruation based on cycle
+  bool isPredictedMenstruationDay(DateTime day) {
+    if (_lastPeriodStart == null) return false;
+    
+    int daysSinceLastPeriod = day.difference(_lastPeriodStart!).inDays;
     return daysSinceLastPeriod >= 0 &&
         daysSinceLastPeriod % _cycleLength < _menstruationLength;
   }
 
   bool isOvulationDay(DateTime day) {
-    int cycleDay = (day.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
+    if (_lastPeriodStart == null) return false;
+    
+    int cycleDay = (day.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
     return cycleDay == 14;
   }
 
   bool isFertileDay(DateTime day) {
-    int cycleDay = (day.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
+    if (_lastPeriodStart == null) return false;
+    
+    int cycleDay = (day.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
     return cycleDay >= 10 && cycleDay <= 15;
   }
 
-  // functie om te checken of een dag symptomen heeft
+  // Check if day has symptoms from Firestore
   bool hasSymptoms(DateTime day) {
-    List<String> symptoms = getSymptomsForDay(day);
-    return symptoms.isNotEmpty;
+    String dateKey = '${day.year}-${day.month}-${day.day}';
+    return _symptomsCache.containsKey(dateKey) && _symptomsCache[dateKey]!.isNotEmpty;
   }
 
-  List<String> getSymptomsForDay(DateTime day) {
-    if (day.day % 5 == 0) return ['Buikpijn', 'Vermoeid'];
-    if (day.day % 3 == 0) return ['Hoofdpijn'];
-    return [];
+  List<Map<String, dynamic>> getSymptomsForDay(DateTime day) {
+    String dateKey = '${day.year}-${day.month}-${day.day}';
+    return _symptomsCache[dateKey] ?? [];
+  }
+
+  Map<String, dynamic>? getMenstruationForDay(DateTime day) {
+    String dateKey = '${day.year}-${day.month}-${day.day}';
+    return _menstruationCache[dateKey];
   }
 
   String getCycleDayLabel(DateTime date) {
-    int dayDiff = date.difference(_lastPeriodStart).inDays;
+    if (_lastPeriodStart == null) return 'Dag onbekend';
+    
+    int dayDiff = date.difference(_lastPeriodStart!).inDays;
     int cycleDay = (dayDiff % _cycleLength) + 1;
 
-    if (cycleDay <= _menstruationLength) {
-      return 'Menstruatiedag $cycleDay';
+    if (isMenstruationDay(date)) {
+      return 'Menstruatiedag (geregistreerd)';
+    } else if (cycleDay <= _menstruationLength) {
+      return 'Voorspelde menstruatiedag $cycleDay';
     } else if (cycleDay >= 10 && cycleDay <= 15) {
       return 'Vruchtbare periode - Dag $cycleDay';
     } else if (cycleDay == 14) {
@@ -57,10 +109,14 @@ class CycleCalculator {
   }
 
   String getPhaseDescription(DateTime date) {
-    int cycleDay = (date.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
+    if (_lastPeriodStart == null) return 'Geen cyclus data beschikbaar';
+    
+    int cycleDay = (date.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
 
-    if (cycleDay <= _menstruationLength) {
-      return 'Je menstruatie is bezig. Zorg goed voor jezelf!';
+    if (isMenstruationDay(date)) {
+      return 'Je menstruatie is geregistreerd voor deze dag.';
+    } else if (cycleDay <= _menstruationLength) {
+      return 'Voorspelde menstruatie. Registreer je periode als deze begint.';
     } else if (cycleDay >= 10 && cycleDay <= 15) {
       return 'Dit is je vruchtbare periode. Verhoogde kans op zwangerschap.';
     } else if (cycleDay == 14) {
@@ -73,7 +129,9 @@ class CycleCalculator {
   }
 
   String getPregnancyChance(DateTime date) {
-    int cycleDay = (date.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
+    if (_lastPeriodStart == null) return 'Onbekend';
+    
+    int cycleDay = (date.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
     if (cycleDay == 14) return 'Zeer hoog (±80%)';
     if (cycleDay >= 12 && cycleDay <= 16) return 'Hoog (±60%)';
     if (cycleDay >= 10 && cycleDay <= 18) return 'Gemiddeld (±30%)';
@@ -81,15 +139,19 @@ class CycleCalculator {
   }
 
   Color getPregnancyChanceColor(DateTime date) {
-    int cycleDay = (date.difference(_lastPeriodStart).inDays % _cycleLength) + 1;
+    if (_lastPeriodStart == null) return Colors.grey;
+    
+    int cycleDay = (date.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
     if (cycleDay == 14) return Colors.red.shade600;
     if (cycleDay >= 12 && cycleDay <= 16) return Colors.orange.shade600;
     if (cycleDay >= 10 && cycleDay <= 18) return Colors.yellow.shade700;
     return Colors.green.shade600;
   }
 
-  DateTime getNextPeriodStart(DateTime selectedDay) {
-    DateTime next = _lastPeriodStart;
+  DateTime? getNextPeriodStart(DateTime selectedDay) {
+    if (_lastPeriodStart == null) return null;
+    
+    DateTime next = _lastPeriodStart!;
     while (next.isBefore(selectedDay)) {
       next = next.add(Duration(days: _cycleLength));
     }
@@ -97,7 +159,9 @@ class CycleCalculator {
   }
 
   int getDaysUntilNextPeriod(DateTime selectedDay) {
-    return getNextPeriodStart(selectedDay).difference(selectedDay).inDays;
+    final nextPeriod = getNextPeriodStart(selectedDay);
+    if (nextPeriod == null) return 0;
+    return nextPeriod.difference(selectedDay).inDays;
   }
 
   bool isToday(DateTime day) {
@@ -105,10 +169,10 @@ class CycleCalculator {
     return day.year == now.year && day.month == now.month && day.day == now.day;
   }
 
-  // buildCalendarDay accepteert nu filters
   Widget? buildCalendarDay(DateTime day, Map<String, bool> filters) {
     bool hasSymptomsToday = hasSymptoms(day);
     bool isMenstruation = isMenstruationDay(day);
+    bool isPredictedMenstruation = isPredictedMenstruationDay(day);
     bool isOvulation = isOvulationDay(day);
     bool isFertile = isFertileDay(day);
     bool isTodayFlag = isToday(day);
@@ -124,11 +188,25 @@ class CycleCalculator {
       );
     }
 
+    // Actual menstruation takes priority over predicted
     if (isMenstruation && (filters['menstruation'] ?? true)) {
       return _buildCalendarDayContainer(
         day: day,
         color: Colors.pinkAccent,
         icon: Icons.water_drop,
+        showSymptomsIcon: hasSymptomsToday && (filters['symptoms'] ?? true),
+      );
+    }
+
+    // Show predicted menstruation with different styling
+    if (isPredictedMenstruation && (filters['menstruation'] ?? true)) {
+      return _buildCalendarDayContainer(
+        day: day,
+        color: Colors.pink.shade100,
+        icon: Icons.water_drop_outlined,
+        textColor: Colors.pink.shade700,
+        hasBorder: true,
+        borderColor: Colors.pink.shade300,
         showSymptomsIcon: hasSymptomsToday && (filters['symptoms'] ?? true),
       );
     }
@@ -154,15 +232,14 @@ class CycleCalculator {
       );
     }
 
-
-    // Als er geen fase maar wel symptomen zijn en symptomen filter aan
+    // Show symptoms if no other phase
     if (hasSymptomsToday && (filters['symptoms'] ?? true)) {
       return _buildCalendarDayContainer(
         day: day,
         color: Colors.orange.shade300,
         icon: Icons.healing,
         textColor: Colors.white,
-        showSymptomsIcon: false, // want al symptoom icoon = hoofdicoon hier
+        showSymptomsIcon: false,
       );
     }
     
