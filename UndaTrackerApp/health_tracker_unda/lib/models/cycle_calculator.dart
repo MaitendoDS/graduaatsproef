@@ -1,33 +1,31 @@
 import 'package:flutter/material.dart';
-
 import '../services/tracking_service.dart';
-
 
 class CycleCalculator {
   final FirestoreService _firestoreService = FirestoreService();
-  
+
   int _cycleLength = 28;
   int _menstruationLength = 5;
   DateTime? _lastPeriodStart;
-  
-  // Cache for symptoms and menstruation data
+
+  // Cache voor symptomen en menstruatie data
   Map<String, List<Map<String, dynamic>>> _symptomsCache = {};
   Map<String, Map<String, dynamic>> _menstruationCache = {};
-  
+
   // Getters
   int get cycleLength => _cycleLength;
   int get menstruationLength => _menstruationLength;
   DateTime? get lastPeriodStart => _lastPeriodStart;
 
-  // Initialize with user data from Firestore
+  // Initialiseer met data van Firestore
   Future<void> initialize() async {
     final userData = await _firestoreService.getUserCycleData();
     if (userData != null) {
       _cycleLength = userData['cycleLength'] ?? 28;
       _menstruationLength = userData['menstruationLength'] ?? 5;
     }
-    
-    // Get the most recent menstruation start date
+
+    // Haal de meest recente startdatum van de menstruatie
     final menstruationDates = await _firestoreService.getAllMenstruationDates();
     if (menstruationDates.isNotEmpty) {
       _lastPeriodStart = menstruationDates.first;
@@ -36,22 +34,20 @@ class CycleCalculator {
     }
   }
 
-  // Load data for calendar display
+  // Laad data voor kalenderweergave
   Future<void> loadDataForDateRange(DateTime startDate, DateTime endDate) async {
     _symptomsCache = await _firestoreService.getSymptomsForDateRange(startDate, endDate);
     _menstruationCache = await _firestoreService.getMenstruationForDateRange(startDate, endDate);
   }
 
-  // Check if day has menstruation data from Firestore
   bool isMenstruationDay(DateTime day) {
-    String dateKey = '${day.year}-${day.month}-${day.day}';
+    String dateKey = _formatDateKey(day);
     return _menstruationCache.containsKey(dateKey);
   }
 
-  // Predicted menstruation based on cycle
   bool isPredictedMenstruationDay(DateTime day) {
     if (_lastPeriodStart == null) return false;
-    
+
     int daysSinceLastPeriod = day.difference(_lastPeriodStart!).inDays;
     return daysSinceLastPeriod >= 0 &&
         daysSinceLastPeriod % _cycleLength < _menstruationLength;
@@ -59,37 +55,36 @@ class CycleCalculator {
 
   bool isOvulationDay(DateTime day) {
     if (_lastPeriodStart == null) return false;
-    
+
     int cycleDay = (day.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
     return cycleDay == 14;
   }
 
   bool isFertileDay(DateTime day) {
     if (_lastPeriodStart == null) return false;
-    
+
     int cycleDay = (day.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
     return cycleDay >= 10 && cycleDay <= 15;
   }
 
-  // Check if day has symptoms from Firestore
   bool hasSymptoms(DateTime day) {
-    String dateKey = '${day.year}-${day.month}-${day.day}';
+    String dateKey = _formatDateKey(day);
     return _symptomsCache.containsKey(dateKey) && _symptomsCache[dateKey]!.isNotEmpty;
   }
 
   List<Map<String, dynamic>> getSymptomsForDay(DateTime day) {
-    String dateKey = '${day.year}-${day.month}-${day.day}';
+    String dateKey = _formatDateKey(day);
     return _symptomsCache[dateKey] ?? [];
   }
 
   Map<String, dynamic>? getMenstruationForDay(DateTime day) {
-    String dateKey = '${day.year}-${day.month}-${day.day}';
+    String dateKey = _formatDateKey(day);
     return _menstruationCache[dateKey];
   }
 
   String getCycleDayLabel(DateTime date) {
     if (_lastPeriodStart == null) return 'Dag onbekend';
-    
+
     int dayDiff = date.difference(_lastPeriodStart!).inDays;
     int cycleDay = (dayDiff % _cycleLength) + 1;
 
@@ -110,7 +105,7 @@ class CycleCalculator {
 
   String getPhaseDescription(DateTime date) {
     if (_lastPeriodStart == null) return 'Geen cyclus data beschikbaar';
-    
+
     int cycleDay = (date.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
 
     if (isMenstruationDay(date)) {
@@ -130,7 +125,7 @@ class CycleCalculator {
 
   String getPregnancyChance(DateTime date) {
     if (_lastPeriodStart == null) return 'Onbekend';
-    
+
     int cycleDay = (date.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
     if (cycleDay == 14) return 'Zeer hoog (±80%)';
     if (cycleDay >= 12 && cycleDay <= 16) return 'Hoog (±60%)';
@@ -140,7 +135,7 @@ class CycleCalculator {
 
   Color getPregnancyChanceColor(DateTime date) {
     if (_lastPeriodStart == null) return Colors.grey;
-    
+
     int cycleDay = (date.difference(_lastPeriodStart!).inDays % _cycleLength) + 1;
     if (cycleDay == 14) return Colors.red.shade600;
     if (cycleDay >= 12 && cycleDay <= 16) return Colors.orange.shade600;
@@ -150,7 +145,7 @@ class CycleCalculator {
 
   DateTime? getNextPeriodStart(DateTime selectedDay) {
     if (_lastPeriodStart == null) return null;
-    
+
     DateTime next = _lastPeriodStart!;
     while (next.isBefore(selectedDay)) {
       next = next.add(Duration(days: _cycleLength));
@@ -188,7 +183,6 @@ class CycleCalculator {
       );
     }
 
-    // Actual menstruation takes priority over predicted
     if (isMenstruation && (filters['menstruation'] ?? true)) {
       return _buildCalendarDayContainer(
         day: day,
@@ -198,7 +192,6 @@ class CycleCalculator {
       );
     }
 
-    // Show predicted menstruation with different styling
     if (isPredictedMenstruation && (filters['menstruation'] ?? true)) {
       return _buildCalendarDayContainer(
         day: day,
@@ -232,7 +225,6 @@ class CycleCalculator {
       );
     }
 
-    // Show symptoms if no other phase
     if (hasSymptomsToday && (filters['symptoms'] ?? true)) {
       return _buildCalendarDayContainer(
         day: day,
@@ -242,7 +234,7 @@ class CycleCalculator {
         showSymptomsIcon: false,
       );
     }
-    
+
     return null;
   }
 
@@ -313,5 +305,12 @@ class CycleCalculator {
           ),
       ],
     );
+  }
+
+  String _formatDateKey(DateTime date) {
+    // Zorgt dat maand en dag altijd 2 cijfers zijn, bv 2025-06-09
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
   }
 }

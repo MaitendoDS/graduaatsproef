@@ -39,10 +39,12 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
 
   Future<void> _loadDayData() async {
     setState(() => _isLoading = true);
-    
+
     _symptoms = widget.cycleCalculator.getSymptomsForDay(widget.selectedDay);
-    _menstruationData = widget.cycleCalculator.getMenstruationForDay(widget.selectedDay);
-    
+    _menstruationData = widget.cycleCalculator.getMenstruationForDay(
+      widget.selectedDay,
+    );
+
     setState(() => _isLoading = false);
   }
 
@@ -78,9 +80,18 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
       iconColor: Colors.blue,
       children: [
         _buildInfoRow('Datum', _formatDate(widget.selectedDay)),
-        _buildInfoRow('Cyclus Dag', widget.cycleCalculator.getCycleDayLabel(widget.selectedDay)),
-        _buildInfoRow('Fase', widget.cycleCalculator.getPhaseDescription(widget.selectedDay)),
-        _buildInfoRow('Zwangerschapskans', widget.cycleCalculator.getPregnancyChance(widget.selectedDay)),
+        _buildInfoRow(
+          'Cyclus Dag',
+          widget.cycleCalculator.getCycleDayLabel(widget.selectedDay),
+        ),
+        _buildInfoRow(
+          'Fase',
+          widget.cycleCalculator.getPhaseDescription(widget.selectedDay),
+        ),
+        _buildInfoRow(
+          'Zwangerschapskans',
+          widget.cycleCalculator.getPregnancyChance(widget.selectedDay),
+        ),
       ],
     );
   }
@@ -92,14 +103,25 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
       iconColor: Colors.pink,
       children: [
         if (_menstruationData!['sexOptions'] != null)
-          _buildInfoRow('Seks opties', _menstruationData!['sexOptions'].toString()),
-        if (_menstruationData!['symptoms'] != null && _menstruationData!['symptoms'].isNotEmpty)
+          _buildInfoRow(
+            'Seks',
+            _menstruationData!['sexOptions'].toString(),
+          ),
+        if (_menstruationData!['symptoms'] != null &&
+            _menstruationData!['symptoms'].isNotEmpty)
           _buildInfoRow('Symptomen', _menstruationData!['symptoms'].join(', ')),
         if (_menstruationData!['dischargeAmount'] != null)
-          _buildInfoRow('Afscheiding hoeveelheid', _menstruationData!['dischargeAmount'].toString()),
+          _buildInfoRow(
+            'Afscheiding hoeveelheid',
+            _menstruationData!['dischargeAmount'].toString(),
+          ),
         if (_menstruationData!['dischargeType'] != null)
-          _buildInfoRow('Afscheiding type', _menstruationData!['dischargeType'].toString()),
-        if (_menstruationData!['notities'] != null && _menstruationData!['notities'].isNotEmpty)
+          _buildInfoRow(
+            'Afscheiding type',
+            _menstruationData!['dischargeType'].toString(),
+          ),
+        if (_menstruationData!['notities'] != null &&
+            _menstruationData!['notities'].isNotEmpty)
           _buildInfoRow('Notities', _menstruationData!['notities'].toString()),
         const SizedBox(height: 12),
         ElevatedButton(
@@ -122,9 +144,7 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
       title: 'Symptomen',
       icon: Icons.healing,
       iconColor: Colors.orange,
-      children: [
-        ..._symptoms.map((symptom) => _buildSymptomCard(symptom)),
-      ],
+      children: [..._symptoms.map((symptom) => _buildSymptomCard(symptom))],
     );
   }
 
@@ -142,11 +162,7 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
         children: [
           Row(
             children: [
-              Icon(
-                _getSymptomIcon(symptom['type']),
-                color: Colors.orange.shade700,
-                size: 20,
-              ),
+              Icon(Icons.healing, color: Colors.orange.shade700, size: 20),
               const SizedBox(width: 8),
               Text(
                 symptom['type'] ?? 'Onbekend symptoom',
@@ -159,10 +175,7 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
               if (symptom['tijd'] != null)
                 Text(
                   symptom['tijd'].toString(),
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
             ],
           ),
@@ -175,18 +188,15 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
             Row(
               children: [
                 const Text('Pijnschaal: '),
-                ...List.generate(5, (index) {
-                  return Icon(
-                    index < symptom['pijnschaal'] ? Icons.star : Icons.star_border,
-                    color: Colors.orange,
-                    size: 16,
-                  );
+                ...List.generate(symptom['pijnschaal'], (index) {
+                  return Icon(Icons.bolt, color: Colors.orange, size: 16);
                 }),
-                Text(' (${symptom['pijnschaal']}/5)'),
+                Text(' (${symptom['pijnschaal']}/10)'),
               ],
             ),
           ],
-          if (symptom['notities'] != null && symptom['notities'].isNotEmpty) ...[
+          if (symptom['notities'] != null &&
+              symptom['notities'].isNotEmpty) ...[
             const SizedBox(height: 8),
             Text('Notities: ${symptom['notities']}'),
           ],
@@ -240,36 +250,28 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: TextStyle(color: Colors.grey.shade700),
-            ),
+            child: Text(value, style: TextStyle(color: Colors.grey.shade700)),
           ),
         ],
       ),
     );
   }
 
-  IconData _getSymptomIcon(String? type) {
-    switch (type?.toLowerCase()) {
-      case 'buikpijn':
-        return Icons.accessibility_new;
-      case 'hoofdpijn':
-        return Icons.psychology;
-      case 'vermoeid':
-        return Icons.battery_2_bar;
-      case 'kramp':
-        return Icons.flash_on;
-      default:
-        return Icons.healing;
-    }
-  }
-
   String _formatDate(DateTime date) {
     const months = [
-      'januari', 'februari', 'maart', 'april', 'mei', 'juni',
-      'juli', 'augustus', 'september', 'oktober', 'november', 'december'
+      'januari',
+      'februari',
+      'maart',
+      'april',
+      'mei',
+      'juni',
+      'juli',
+      'augustus',
+      'september',
+      'oktober',
+      'november',
+      'december',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
-  }
+}

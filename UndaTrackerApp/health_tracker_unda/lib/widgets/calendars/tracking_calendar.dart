@@ -26,36 +26,49 @@ class TrackerCalendarWidget extends StatefulWidget {
 
 class _TrackerCalendarWidgetState extends State<TrackerCalendarWidget> {
   bool _isLoading = false;
+  late DateTime _internalFocusedDay;
 
   @override
   void initState() {
     super.initState();
+    _internalFocusedDay = widget.focusedDay;
     _loadCalendarData();
+  }
+
+  @override
+  void didUpdateWidget(covariant TrackerCalendarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!isSameDay(oldWidget.focusedDay, widget.focusedDay)) {
+      _internalFocusedDay = widget.focusedDay;
+      _loadCalendarData();
+    }
   }
 
   Future<void> _loadCalendarData() async {
     setState(() => _isLoading = true);
-    
-    // Load data for the current month
-    DateTime firstDay = DateTime(widget.focusedDay.year, widget.focusedDay.month, 1);
-    DateTime lastDay = DateTime(widget.focusedDay.year, widget.focusedDay.month + 1, 0);
-    
+
+    DateTime firstDay = DateTime(_internalFocusedDay.year, _internalFocusedDay.month, 1);
+    DateTime lastDay = DateTime(_internalFocusedDay.year, _internalFocusedDay.month + 1, 0);
+
     await widget.cycleCalculator.loadDataForDateRange(firstDay, lastDay);
-    
+    if (!mounted) return;
     setState(() => _isLoading = false);
   }
 
   Future<void> _onPageChanged(DateTime focusedDay) async {
-    // Load data for the new month
-    setState(() => _isLoading = true);
-    
+    print('Nieuwe maand geselecteerd: $focusedDay');
+    setState(() {
+      _internalFocusedDay = focusedDay;
+      _isLoading = true;
+    });
+
     DateTime firstDay = DateTime(focusedDay.year, focusedDay.month, 1);
     DateTime lastDay = DateTime(focusedDay.year, focusedDay.month + 1, 0);
-    
+
     await widget.cycleCalculator.loadDataForDateRange(firstDay, lastDay);
-    
+    if (!mounted) return;
     setState(() => _isLoading = false);
-    
+
     widget.onPageChanged(focusedDay);
   }
 
@@ -77,7 +90,7 @@ class _TrackerCalendarWidgetState extends State<TrackerCalendarWidget> {
         children: [
           TableCalendar(
             locale: 'nl',
-            focusedDay: widget.focusedDay,
+            focusedDay: _internalFocusedDay,
             firstDay: DateTime(2000),
             lastDay: DateTime(2100),
             selectedDayPredicate: (day) => isSameDay(widget.selectedDay, day),
