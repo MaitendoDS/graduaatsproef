@@ -525,7 +525,6 @@ Widget _buildFoodCard(Map<String, dynamic> food) {
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: () {
-                  print('Edit button pressed for food ID: $foodId'); // Debug log
                   _editFood(food);
                 },
                 icon: const Icon(Icons.edit, size: 16),
@@ -542,7 +541,6 @@ Widget _buildFoodCard(Map<String, dynamic> food) {
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: () {
-                  print('Delete button pressed for food ID: $foodId'); // Debug log
                   _deleteFood(foodId, foodName);
                 },
                 icon: const Icon(Icons.delete, size: 16),
