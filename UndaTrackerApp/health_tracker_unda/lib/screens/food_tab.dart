@@ -4,6 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../widgets/buttons/buttons.dart';
+import '../widgets/custom_text_field.dart';
+import '../widgets/section_container.dart';
+import '../widgets/time_selector.dart';
+
 class FoodTab extends StatefulWidget {
   final DateTime selectedDay;
 
@@ -31,8 +36,18 @@ class _FoodTabState extends State<FoodTab> {
   ];
 
   final List<String> allergenOptions = [
-    'Zuivel', 'Gluten', 'Noten', 'Eieren', 'Vis', 'Schaaldieren', 
-    'Soja', 'Sesam', 'Mosterd', 'Selderij', 'Lupine', 'Sulfiet'
+    'Zuivel',
+    'Gluten',
+    'Noten',
+    'Eieren',
+    'Vis',
+    'Schaaldieren',
+    'Soja',
+    'Sesam',
+    'Mosterd',
+    'Selderij',
+    'Lupine',
+    'Sulfiet',
   ];
 
   Future<void> _selectTime() async {
@@ -98,98 +113,115 @@ class _FoodTabState extends State<FoodTab> {
     );
   }
 
-  Widget buildChipSelector(List<String> options, Set<String> selectedSet, Color chipColor) {
+  Widget buildChipSelector(
+    List<String> options,
+    Set<String> selectedSet,
+    Color chipColor,
+  ) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: options.map((option) {
-        final isSelected = selectedSet.contains(option);
-        return ChoiceChip(
-          label: Text(
-            option,
-            style: TextStyle(
-              color: isSelected ? Colors.white : chipColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          selected: isSelected,
-          onSelected: (selected) {
-            setState(() {
-              if (selected) {
-                selectedSet.add(option);
-              } else {
-                selectedSet.remove(option);
-              }
-            });
-          },
-          selectedColor: chipColor,
-          backgroundColor: chipColor.withOpacity(0.1),
-          side: BorderSide(
-            color: isSelected ? chipColor : chipColor.withOpacity(0.3),
-          ),
-        );
-      }).toList(),
+      children:
+          options.map((option) {
+            final isSelected = selectedSet.contains(option);
+            return ChoiceChip(
+              label: Text(
+                option,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : chipColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              selected: isSelected,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedSet.add(option);
+                  } else {
+                    selectedSet.remove(option);
+                  }
+                });
+              },
+              selectedColor: chipColor,
+              backgroundColor: chipColor.withOpacity(0.1),
+              side: BorderSide(
+                color: isSelected ? chipColor : chipColor.withOpacity(0.3),
+              ),
+            );
+          }).toList(),
     );
   }
 
-  Widget buildIconSelector(List<Map<String, dynamic>> options, Set<String> selectedSet, Color baseColor) {
+  Widget buildIconSelector(
+    List<Map<String, dynamic>> options,
+    Set<String> selectedSet,
+    Color baseColor,
+  ) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: options.map((option) {
-          final isSelected = selectedSet.contains(option['label']);
-          return Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (isSelected) {
-                    selectedSet.remove(option['label']);
-                  } else {
-                    selectedSet.add(option['label']);
-                  }
-                });
-              },
-              child: Column(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: isSelected ? baseColor : baseColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: isSelected ? baseColor : baseColor.withOpacity(0.3),
-                        width: 2,
+        children:
+            options.map((option) {
+              final isSelected = selectedSet.contains(option['label']);
+              return Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        selectedSet.remove(option['label']);
+                      } else {
+                        selectedSet.add(option['label']);
+                      }
+                    });
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected
+                                  ? baseColor
+                                  : baseColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color:
+                                isSelected
+                                    ? baseColor
+                                    : baseColor.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          option['icon'],
+                          color: isSelected ? Colors.white : baseColor,
+                          size: 24,
+                        ),
                       ),
-                    ),
-                    child: Icon(
-                      option['icon'], 
-                      color: isSelected ? Colors.white : baseColor,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: 80,
-                    child: Text(
-                      option['label'],
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? baseColor : Colors.grey.shade600,
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          option['label'],
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color:
+                                isSelected ? baseColor : Colors.grey.shade600,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -241,7 +273,10 @@ class _FoodTabState extends State<FoodTab> {
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('EEEE d MMMM y', 'nl').format(widget.selectedDay);
+    final formattedDate = DateFormat(
+      'EEEE d MMMM y',
+      'nl',
+    ).format(widget.selectedDay);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -271,159 +306,96 @@ class _FoodTabState extends State<FoodTab> {
               title: 'Maaltijd type',
               icon: Icons.restaurant_menu,
               iconColor: Colors.orange.shade400,
-              child: buildIconSelector(foodTypeOptions, selectedFoodTypes, Colors.orange.shade400),
+              child: buildIconSelector(
+                foodTypeOptions,
+                selectedFoodTypes,
+                Colors.orange.shade400,
+              ),
             ),
-
+            const SizedBox(height: 16),
             // Tijd Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Tijdstip',
               icon: Icons.access_time,
               iconColor: Colors.blue.shade400,
-              child: GestureDetector(
-                onTap: _selectTime,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.schedule, color: Colors.blue.shade400),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Tijdstip: ${_selectedTime.format(context)}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                      const Spacer(),
-                      Icon(Icons.edit, color: Colors.blue.shade400, size: 20),
-                    ],
-                  ),
+              children: [
+                TimeSelector(
+                  selectedTime: _selectedTime,
+                  selectedDay: widget.selectedDay,
+                  onTap: _selectTime,
+                  accentColor: Colors.blue,
                 ),
-              ),
+              ],
             ),
 
+            const SizedBox(height: 16),
             // Wat gegeten Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Wat heb je gegeten',
               icon: Icons.fastfood,
               iconColor: Colors.purple.shade400,
-              child: TextField(
-                controller: _foodController,
-                decoration: InputDecoration(
+              children: [
+                CustomTextField(
+                  controller: _foodController,
                   hintText: 'Bijvoorbeeld: Boterham met kaas',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.purple.shade400),
-                  ),
-                  contentPadding: const EdgeInsets.all(16),
+                  accentColor: Colors.purple,
                 ),
-              ),
+              ],
             ),
 
+            const SizedBox(height: 16),
             // Ingrediënten Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Ingrediënten',
               icon: Icons.eco,
               iconColor: Colors.green.shade400,
-              child: TextField(
-                controller: _ingredientsController,
-                maxLines: 3,
-                decoration: InputDecoration(
+              children: [
+                CustomTextField(
+                  controller: _ingredientsController,
                   hintText: 'Bijvoorbeeld: brood, kaas, boter',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.green.shade400),
-                  ),
-                  contentPadding: const EdgeInsets.all(16),
+                  accentColor: Colors.green,
                 ),
-              ),
+              ],
             ),
+            const SizedBox(height: 16),
 
             // Allergenen Card
             buildStyledCard(
               title: 'Allergenen',
               icon: Icons.warning_amber,
               iconColor: Colors.red.shade400,
-              child: buildChipSelector(allergenOptions, selectedAllergens, Colors.red.shade400),
+              child: buildChipSelector(
+                allergenOptions,
+                selectedAllergens,
+                Colors.red.shade400,
+              ),
             ),
-
+            const SizedBox(height: 16),
             // Notities Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Notities',
               icon: Icons.note_alt,
               iconColor: Colors.teal.shade400,
-              child: TextField(
-                controller: _notesController,
-                maxLines: 4,
-                decoration: InputDecoration(
+              children: [
+                CustomTextField(
+                  controller: _notesController,
                   hintText: 'Voeg extra info toe...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.teal.shade400),
-                  ),
-                  contentPadding: const EdgeInsets.all(16),
+                  maxLines: 4,
+                  accentColor: Colors.teal,
                 ),
-              ),
+              ],
             ),
 
             const SizedBox(height: 16),
 
             // Opslaan Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _saveToFirestore,
-                icon: const Icon(Icons.check, size: 20),
-                label: const Text(
-                  "Voedinggegevens opslaan",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade400,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 4,
-                  shadowColor: Colors.green.shade200,
-                ),
-              ),
+            ActionButton(
+              label: "Voedinggegevens opslaan",
+              icon: Icons.check,
+              color: Colors.green.shade400,
+              onPressed: _saveToFirestore,
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),
