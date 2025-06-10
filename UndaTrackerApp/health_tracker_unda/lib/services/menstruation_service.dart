@@ -33,4 +33,54 @@ class MenstruationService {
       return false;
     }
   }
+  
+  // ⭐ ADD: Delete method (static)
+  static Future<void> deleteMenstruation(String documentId) async {
+    try {
+      print('Attempting to delete menstruation: $documentId');
+      
+      final docRef = FirebaseFirestore.instance.collection('menstruatie').doc(documentId);
+      
+      // Check if document exists
+      final docSnapshot = await docRef.get();
+      if (!docSnapshot.exists) {
+        throw Exception('Menstruatie data bestaat niet meer');
+      }
+      
+      await docRef.delete();
+      print('Successfully deleted menstruation: $documentId');
+    } catch (e) {
+      print('Error deleting menstruation: $e');
+      throw Exception('Fout bij verwijderen menstruatie data: $e');
+    }
+  }
+
+  // ⭐ ADD: Update method
+  Future<bool> updateMenstruationData({
+    required String documentId,
+    required DateTime selectedDay,
+    required MenstruationData data,
+    required String notes,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return false;
+
+      final firestoreData = {
+        'datum': Timestamp.fromDate(selectedDay),
+        'notities': notes,
+        'bijgewerktOp': FieldValue.serverTimestamp(),
+        ...data.toFirestoreData(),
+      };
+
+      await _firestore.collection('menstruatie')
+          .doc(documentId)
+          .update(firestoreData);
+      return true;
+    } catch (e) {
+      print('Error updating menstruation data: $e');
+      return false;
+    }
+  }
+
 }

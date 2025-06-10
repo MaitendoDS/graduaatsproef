@@ -31,4 +31,47 @@ class SymptomService {
       return 'Fout bij opslaan: $e';
     }
   }
+    // DELETE METHOD
+  static Future<void> deleteSymptom(String documentId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('symptomen')
+          .doc(documentId)
+          .delete();
+    } catch (e) {
+      throw Exception('Fout bij verwijderen symptoom: $e');
+    }
+  }
+
+  // UPDATE METHOD
+  static Future<String?> updateSymptom(String documentId, SymptomData symptomData) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      
+      if (user == null) {
+        return "Geen gebruiker ingelogd";
+      }
+
+      if (!symptomData.isValid) {
+        if (symptomData.selectedType == null) {
+          return "Selecteer een type symptoom";
+        }
+        if (symptomData.location.trim().isEmpty) {
+          return "Vul een locatie in";
+        }
+      }
+
+      final data = symptomData.toFirestoreData(user.uid);
+      data['bijgewerktOp'] = FieldValue.serverTimestamp();
+      
+      await FirebaseFirestore.instance
+          .collection('symptomen')
+          .doc(documentId)
+          .update(data);
+      
+      return null; // Success
+    } catch (e) {
+      return 'Fout bij bijwerken symptoom: $e';
+    }
+  }
 }

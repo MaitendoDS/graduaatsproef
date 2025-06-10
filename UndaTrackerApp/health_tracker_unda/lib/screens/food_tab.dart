@@ -7,8 +7,17 @@ import '../widgets/forms/food_form.dart';
 
 class FoodTab extends StatefulWidget {
   final DateTime selectedDay;
+  final FoodData? initialData;  // Voor edit mode
+  final bool isEditing;         // Is dit een edit of nieuwe entry
+  final String? documentId;     // Document ID voor updates
 
-  const FoodTab({super.key, required this.selectedDay});
+  const FoodTab({
+    super.key, 
+    required this.selectedDay,
+    this.initialData,
+    this.isEditing = false,
+    this.documentId,
+  });
 
   @override
   State<FoodTab> createState() => _FoodTabState();
@@ -23,16 +32,32 @@ class _FoodTabState extends State<FoodTab> {
     });
 
     try {
-      await FoodService.saveFoodEntry(foodData);
+      if (widget.isEditing && widget.documentId != null) {
+        // UPDATE bestaande entry
+        await FoodService.updateFoodEntry(widget.documentId!, foodData);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Voedingsgegevens bijgewerkt'),
+              backgroundColor: FoodConstants.successGreen,
+            ),
+          );
+          Navigator.pop(context, true); // Return true voor refresh
+        }
+      } else {
+        // CREATE nieuwe entry
+        await FoodService.saveFoodEntry(foodData);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(FoodConstants.successMessage),
-            backgroundColor: FoodConstants.successGreen,
-          ),
-        );
-        Navigator.pop(context);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(FoodConstants.successMessage),
+              backgroundColor: FoodConstants.successGreen,
+            ),
+          );
+          Navigator.pop(context, true); // Return true voor refresh
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -65,7 +90,7 @@ class _FoodTabState extends State<FoodTab> {
     return Scaffold(
       backgroundColor: FoodConstants.backgroundGrey,
       appBar: AppBar(
-        title: const Text(FoodConstants.appBarTitle),
+        title: Text(widget.isEditing ? 'Voeding bewerken' : FoodConstants.appBarTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,
@@ -83,10 +108,10 @@ class _FoodTabState extends State<FoodTab> {
                 ],
               ),
             )
-          :
-           FoodForm(
+          : FoodForm(
               selectedDay: widget.selectedDay,
               onSave: _handleSave,
+              initialData: widget.initialData,
             ),
     );
   }

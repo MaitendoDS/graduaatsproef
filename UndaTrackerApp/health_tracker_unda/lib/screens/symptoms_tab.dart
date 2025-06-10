@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:health_tracker_unda/widgets/headers/app_header.dart';
 import 'package:intl/intl.dart';
@@ -9,8 +8,17 @@ import '../widgets/forms/symptom_form.dart';
 
 class SymptomsTab extends StatefulWidget {
   final DateTime selectedDay;
+  final SymptomData? initialData;  // Voor edit mode
+  final bool isEditing;            // Is dit een edit of nieuwe entry
+  final String? documentId;        // Document ID voor updates
 
-  const SymptomsTab({super.key, required this.selectedDay});
+  const SymptomsTab({
+    super.key, 
+    required this.selectedDay,
+    this.initialData,
+    this.isEditing = false,
+    this.documentId,
+  });
 
   @override
   State<SymptomsTab> createState() => _SymptomsTabState();
@@ -22,7 +30,9 @@ class _SymptomsTabState extends State<SymptomsTab> {
   @override
   void initState() {
     super.initState();
-    _currentSymptomData = SymptomData(
+    
+    // Gebruik initialData als beschikbaar, anders maak nieuwe data
+    _currentSymptomData = widget.initialData ?? SymptomData(
       location: '',
       painScale: 5,
       notes: '',
@@ -38,7 +48,15 @@ class _SymptomsTabState extends State<SymptomsTab> {
   }
 
   Future<void> _confirm() async {
-    final errorMessage = await SymptomService.saveSymptom(_currentSymptomData);
+    String? errorMessage;
+    
+    if (widget.isEditing && widget.documentId != null) {
+      // UPDATE bestaande entry
+      errorMessage = await SymptomService.updateSymptom(widget.documentId!, _currentSymptomData);
+    } else {
+      // CREATE nieuwe entry
+      errorMessage = await SymptomService.saveSymptom(_currentSymptomData);
+    }
     
     if (!mounted) return;
 
@@ -50,13 +68,17 @@ class _SymptomsTabState extends State<SymptomsTab> {
         ),
       );
     } else {
+      final successMessage = widget.isEditing 
+          ? 'Symptoom bijgewerkt' 
+          : 'Symptoom opgeslagen';
+          
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Symptoom opgeslagen'),
+          content: Text(successMessage),
           backgroundColor: Colors.green.shade400,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true); // Return true voor refresh
     }
   }
 
@@ -70,7 +92,7 @@ class _SymptomsTabState extends State<SymptomsTab> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Symptomen toevoegen'),
+        title: Text(widget.isEditing ? 'Symptoom bewerken' : 'Symptomen toevoegen'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,
@@ -82,7 +104,7 @@ class _SymptomsTabState extends State<SymptomsTab> {
           children: [
             // Header
             AppHeader(
-              title: 'Nieuw symptoom',
+              title: widget.isEditing ? 'Symptoom bewerken' : 'Nieuw symptoom',
               subtitle: formattedDate,
               icon: Icons.health_and_safety,
             ),
@@ -98,10 +120,10 @@ class _SymptomsTabState extends State<SymptomsTab> {
 
             const SizedBox(height: 32),
 
-            // Bevestigen Button
+            // Save/Update Button
             ActionButton(
-              label: "Symptoom opslaan",
-              icon: Icons.check,
+              label: widget.isEditing ? "Symptoom bijwerken" : "Symptoom opslaan",
+              icon: widget.isEditing ? Icons.update : Icons.check,
               color: Colors.green.shade400,
               onPressed: _confirm,
             ),

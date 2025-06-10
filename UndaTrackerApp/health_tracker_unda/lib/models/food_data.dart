@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class FoodData {
   final DateTime selectedDay;
@@ -87,17 +88,43 @@ class FoodData {
     };
   }
 
-  // Create from Firestore document
+  // FIXED: Create from Firestore document with proper time parsing
   factory FoodData.fromFirestore(
     Map<String, dynamic> data,
     BuildContext context,
   ) {
+    // Parse time correctly - handle both 12-hour and 24-hour formats
+    TimeOfDay parsedTime = TimeOfDay.now();
+    
+    if (data['tijd'] != null) {
+      try {
+        String timeString = data['tijd'].toString();
+        
+        // Check if it's in 12-hour format (contains AM/PM)
+        if (timeString.toLowerCase().contains('am') || timeString.toLowerCase().contains('pm')) {
+          // Parse 12-hour format like "2:47 PM"
+          final dateFormat = DateFormat('h:mm a');
+          final dateTime = dateFormat.parse(timeString);
+          parsedTime = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+        } else {
+          // Parse 24-hour format like "14:47" or "2:47"
+          final parts = timeString.split(':');
+          if (parts.length >= 2) {
+            final hour = int.tryParse(parts[0]) ?? TimeOfDay.now().hour;
+            final minute = int.tryParse(parts[1]) ?? TimeOfDay.now().minute;
+            parsedTime = TimeOfDay(hour: hour, minute: minute);
+          }
+        }
+      } catch (e) {
+        print('Error parsing time "${data['tijd']}": $e');
+        // Use current time as fallback
+        parsedTime = TimeOfDay.now();
+      }
+    }
+
     return FoodData(
       selectedDay: (data['datum'] as Timestamp).toDate(),
-      selectedTime: TimeOfDay(
-        hour: int.parse(data['tijd'].split(':')[0]),
-        minute: int.parse(data['tijd'].split(':')[1]),
-      ),
+      selectedTime: parsedTime,
       selectedFoodTypes: Set<String>.from(data['foodTypes'] ?? []),
       food: data['wat'] ?? '',
       ingredients: data['ingredienten'] ?? '',

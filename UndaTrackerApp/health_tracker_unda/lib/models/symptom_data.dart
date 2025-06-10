@@ -45,4 +45,33 @@ class SymptomData {
       'aangemaaktOp': FieldValue.serverTimestamp(),
     };
   }
-}
+  
+  // FROM FIRESTORE CONSTRUCTOR
+  factory SymptomData.fromFirestore(Map<String, dynamic> data) {
+  // Parse time correctly
+  TimeOfDay parsedTime = TimeOfDay.now();
+  
+  if (data['tijd'] != null) {
+    try {
+      String timeString = data['tijd'].toString();
+      final parts = timeString.split(':');
+      if (parts.length >= 2) {
+        final hour = int.tryParse(parts[0]) ?? TimeOfDay.now().hour;
+        final minute = int.tryParse(parts[1]) ?? TimeOfDay.now().minute;
+        parsedTime = TimeOfDay(hour: hour, minute: minute);
+      }
+    } catch (e) {
+      print('Error parsing symptom time "${data['tijd']}": $e');
+      parsedTime = TimeOfDay.now();
+    }
+  }
+
+  return SymptomData(
+    selectedType: data['type'],
+    location: data['locatie'] ?? '',
+    painScale: data['pijnschaal'] ?? 5,
+    notes: data['notities'] ?? '',
+    selectedDay: (data['datum'] as Timestamp).toDate(),
+    selectedTime: parsedTime,
+  );
+}}

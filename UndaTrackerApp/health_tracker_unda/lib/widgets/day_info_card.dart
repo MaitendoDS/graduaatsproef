@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 import '../models/cycle_calculator.dart';
+import '../models/food_data.dart';
+import '../models/symptom_data.dart';
+import '../services/food_service.dart';
+import '../services/symptom_service.dart';
+import '../services/menstruation_service.dart';
+import '../screens/food_tab.dart';
+import '../screens/symptoms_tab.dart';
+import '../screens/menstruation_tab.dart';
 import '../widgets/section_container.dart';
 
 class EnhancedDayInfoCard extends StatefulWidget {
   final DateTime selectedDay;
   final CycleCalculator cycleCalculator;
   final VoidCallback onMenstruationPressed;
+  final VoidCallback? onDataChanged; // Callback voor refresh
 
   const EnhancedDayInfoCard({
     super.key,
     required this.selectedDay,
     required this.cycleCalculator,
     required this.onMenstruationPressed,
+    this.onDataChanged,
   });
 
   @override
@@ -42,12 +52,194 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
     setState(() => _isLoading = true);
 
     _symptoms = widget.cycleCalculator.getSymptomsForDay(widget.selectedDay);
-    _menstruationData = widget.cycleCalculator.getMenstruationForDay(
-      widget.selectedDay,
-    );
+    _menstruationData = widget.cycleCalculator.getMenstruationForDay(widget.selectedDay);
     _foodItems = widget.cycleCalculator.getFoodForDay(widget.selectedDay);
-    print('FoodItems voor ${widget.selectedDay}: $_foodItems');
+    
     setState(() => _isLoading = false);
+  }
+
+  // ===== DELETE METHODS =====
+  
+Future<void> _deleteFood(String foodId, String foodName) async {
+  print('Delete food called with ID: $foodId, Name: $foodName'); // Debug log
+  
+  final confirm = await _showDeleteDialog('voedingsitem', foodName);
+  if (confirm != true) {
+    print('Delete cancelled by user'); // Debug log
+    return;
+  }
+
+  try {
+    print('Calling FoodService.deleteFoodEntry...'); // Debug log
+    await FoodService.deleteFoodEntry(foodId);
+    print('Delete successful, showing success message'); // Debug log
+    
+    if (mounted) {
+      _showSuccessMessage('Voedingsitem verwijderd');
+      await _refreshData();
+    }
+  } catch (e) {
+    print('Delete failed with error: $e'); // Debug log
+    if (mounted) {
+      _showErrorMessage('Fout bij verwijderen: $e');
+    }
+  }
+}
+  Future<void> _deleteSymptom(String symptomId, String symptomType) async {
+    final confirm = await _showDeleteDialog('symptoom', symptomType);
+    if (confirm != true) return;
+
+    try {
+      await SymptomService.deleteSymptom(symptomId);
+      _showSuccessMessage('Symptoom verwijderd');
+      await _refreshData();
+    } catch (e) {
+      _showErrorMessage('Fout bij verwijderen: $e');
+    }
+  }
+
+  Future<void> _deleteMenstruation(String menstruationId) async {
+    final confirm = await _showDeleteDialog('menstruatie data', '');
+    if (confirm != true) return;
+
+    try {
+      await MenstruationService.deleteMenstruation(menstruationId);
+      _showSuccessMessage('Menstruatie data verwijderd');
+      await _refreshData();
+    } catch (e) {
+      _showErrorMessage('Fout bij verwijderen: $e');
+    }
+  }
+
+  // ===== EDIT METHODS =====
+  
+Future<void> _editFood(Map<String, dynamic> foodData) async {
+  print('Edit food called with data: $foodData'); // Debug log
+  
+  try {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FoodTab(
+          selectedDay: widget.selectedDay,
+          initialData: FoodData.fromFirestore(foodData, context),
+          isEditing: true,
+          documentId: foodData['id'],
+        ),
+      ),
+    );
+    
+    print('Edit result: $result'); // Debug log
+    
+    if (result == true) {
+      await _refreshData();
+    }
+  } catch (e) {
+    print('Edit failed with error: $e'); // Debug log
+    if (mounted) {
+      _showErrorMessage('Fout bij bewerken: $e');
+    }
+  }
+}
+
+  Future<void> _editSymptom(Map<String, dynamic> symptomData) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SymptomsTab(
+          selectedDay: widget.selectedDay,
+          initialData: SymptomData.fromFirestore(symptomData),
+          isEditing: true,
+          documentId: symptomData['id'],
+        ),
+      ),
+    );
+    
+    if (result == true) {
+      await _refreshData();
+    }
+  }
+
+  Future<void> _editMenstruation(Map<String, dynamic> menstruationData) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MenstruationTab(
+          selectedDay: widget.selectedDay,
+          initialData: menstruationData,
+          isEditing: true,
+          documentId: menstruationData['id'],
+        ),
+      ),
+    );
+    
+    if (result == true) {
+      await _refreshData();
+    }
+  }
+
+  // ===== UTILITY METHODS =====
+  
+  Future<bool?> _showDeleteDialog(String itemType, String itemName) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade400),
+            const SizedBox(width: 8),
+            const Text('Verwijderen?'),
+          ],
+        ),
+        content: Text(
+          itemName.isNotEmpty 
+            ? 'Weet je zeker dat je "$itemName" wilt verwijderen?'
+            : 'Weet je zeker dat je deze $itemType wilt verwijderen?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Annuleren', style: TextStyle(color: Colors.grey.shade600)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Verwijderen'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  Future<void> _refreshData() async {
+    await _loadDayData();
+    widget.onDataChanged?.call(); // Callback naar parent voor refresh
   }
 
   @override
@@ -69,12 +261,12 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
           const SizedBox(height: 16),
           _buildSymptomsSection(),
         ],
-        if (_menstruationData == null && _symptoms.isEmpty)
-          _buildEmptyStateSection(),
         if (_foodItems.isNotEmpty) ...[
           const SizedBox(height: 16),
           _buildFoodSection(),
         ],
+        if (_menstruationData == null && _symptoms.isEmpty && _foodItems.isEmpty)
+          _buildEmptyStateSection(),
       ],
     );
   }
@@ -108,35 +300,49 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
       icon: Icons.water_drop,
       iconColor: Colors.pink,
       children: [
+        // Menstruation data display
         if (_menstruationData!['sexOptions'] != null)
           _buildInfoRow('Seks', _menstruationData!['sexOptions'].toString()),
-        if (_menstruationData!['symptoms'] != null &&
-            _menstruationData!['symptoms'].isNotEmpty)
+        if (_menstruationData!['symptoms'] != null && _menstruationData!['symptoms'].isNotEmpty)
           _buildInfoRow('Symptomen', _menstruationData!['symptoms'].join(', ')),
         if (_menstruationData!['dischargeAmount'] != null)
-          _buildInfoRow(
-            'Afscheiding hoeveelheid',
-            _menstruationData!['dischargeAmount'].toString(),
-          ),
+          _buildInfoRow('Afscheiding hoeveelheid', _menstruationData!['dischargeAmount'].toString()),
         if (_menstruationData!['dischargeType'] != null)
-          _buildInfoRow(
-            'Afscheiding type',
-            _menstruationData!['dischargeType'].toString(),
-          ),
-        if (_menstruationData!['notities'] != null &&
-            _menstruationData!['notities'].isNotEmpty)
+          _buildInfoRow('Afscheiding type', _menstruationData!['dischargeType'].toString()),
+        if (_menstruationData!['notities'] != null && _menstruationData!['notities'].isNotEmpty)
           _buildInfoRow('Notities', _menstruationData!['notities'].toString()),
-        const SizedBox(height: 12),
-        ElevatedButton(
-          onPressed: widget.onMenstruationPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.pink,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        
+        const SizedBox(height: 16),
+        
+        // Action buttons
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _editMenstruation(_menstruationData!),
+                icon: const Icon(Icons.edit, size: 18),
+                label: const Text('Bewerken'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade400,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
             ),
-          ),
-          child: const Text('Bewerk Menstruatie'),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _deleteMenstruation(_menstruationData!['id']),
+                icon: const Icon(Icons.delete, size: 18),
+                label: const Text('Verwijderen'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade400,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -144,16 +350,16 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
 
   Widget _buildSymptomsSection() {
     return SectionContainer(
-      title: 'Symptomen',
+      title: 'Symptomen (${_symptoms.length})',
       icon: Icons.healing,
       iconColor: Colors.orange,
-      children: [..._symptoms.map((symptom) => _buildSymptomCard(symptom))],
+      children: _symptoms.map((symptom) => _buildSymptomCard(symptom)).toList(),
     );
   }
 
   Widget _buildFoodSection() {
     return SectionContainer(
-      title: 'Voeding',
+      title: 'Voeding (${_foodItems.length})',
       icon: Icons.restaurant_menu,
       iconColor: Colors.green,
       children: _foodItems.map((food) => _buildFoodCard(food)).toList(),
@@ -176,14 +382,15 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
             children: [
               Icon(Icons.healing, color: Colors.orange.shade700, size: 20),
               const SizedBox(width: 8),
-              Text(
-                symptom['type'] ?? 'Onbekend symptoom',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange.shade700,
+              Expanded(
+                child: Text(
+                  symptom['type'] ?? 'Onbekend symptoom',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade700,
+                  ),
                 ),
               ),
-              const Spacer(),
               if (symptom['tijd'] != null)
                 Text(
                   symptom['tijd'].toString(),
@@ -191,6 +398,8 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
                 ),
             ],
           ),
+          
+          // Symptom details
           if (symptom['locatie'] != null && symptom['locatie'].isNotEmpty) ...[
             const SizedBox(height: 8),
             Text('Locatie: ${symptom['locatie']}'),
@@ -207,66 +416,166 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
               ],
             ),
           ],
-          if (symptom['notities'] != null &&
-              symptom['notities'].isNotEmpty) ...[
+          if (symptom['notities'] != null && symptom['notities'].isNotEmpty) ...[
             const SizedBox(height: 8),
             Text('Notities: ${symptom['notities']}'),
           ],
+          
+          const SizedBox(height: 12),
+          
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _editSymptom(symptom),
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: const Text('Bewerken'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade400,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _deleteSymptom(symptom['id'], symptom['type'] ?? 'symptoom'),
+                  icon: const Icon(Icons.delete, size: 16),
+                  label: const Text('Verwijderen'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade400,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
-
-  Widget _buildFoodCard(Map<String, dynamic> food) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.restaurant, color: Colors.green.shade700, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                food['wat'] ?? 'Onbekend gerecht',
+Widget _buildFoodCard(Map<String, dynamic> food) {
+  final foodId = food['id'];
+  final foodName = food['wat'] ?? 'Onbekend gerecht';
+  
+  print('Building food card with ID: $foodId, Name: $foodName'); // Debug log
+  
+  return Container(
+    margin: const EdgeInsets.only(bottom: 12),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.green.shade50,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.green.shade200),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.restaurant, color: Colors.green.shade700, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                foodName,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.green.shade700,
                 ),
               ),
-              const Spacer(),
-              if (food['tijd'] != null)
-                Text(
-                  food['tijd'].toString(),
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                ),
-            ],
+            ),
+            if (food['tijd'] != null)
+              Text(
+                food['tijd'].toString(),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
+          ],
+        ),
+        
+        // Debug info (je kunt dit later verwijderen)
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
           ),
-          if (food['ingredienten'] != null && food['ingredienten'].isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text('Ingrediënten: ${food['ingredienten']}'),
+          child: Text(
+            'Debug - ID: $foodId',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade600,
+              fontFamily: 'monospace',
             ),
-          if (food['allergenen'] != null && food['allergenen'].isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text('Allergenen: ${food['allergenen'].join(", ")}'),
+          ),
+        ),
+        
+        // Food details
+        if (food['ingredienten'] != null && food['ingredienten'].isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text('Ingrediënten: ${food['ingredienten']}'),
+          ),
+        if (food['allergenen'] != null && food['allergenen'].isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text('Allergenen: ${food['allergenen'].join(", ")}'),
+          ),
+        if (food['notities'] != null && food['notities'].isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text('Notities: ${food['notities']}'),
+          ),
+        
+        const SizedBox(height: 12),
+        
+        // Action buttons
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  print('Edit button pressed for food ID: $foodId'); // Debug log
+                  _editFood(food);
+                },
+                icon: const Icon(Icons.edit, size: 16),
+                label: const Text('Bewerken'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade400,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
             ),
-          if (food['notities'] != null && food['notities'].isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text('Notities: ${food['notities']}'),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  print('Delete button pressed for food ID: $foodId'); // Debug log
+                  _deleteFood(foodId, foodName);
+                },
+                icon: const Icon(Icons.delete, size: 16),
+                label: const Text('Verwijderen'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade400,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
             ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildEmptyStateSection() {
     return SectionContainer(
@@ -289,9 +598,7 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.pink,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: const Text('Menstruatie Registreren'),
         ),
@@ -322,18 +629,8 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
 
   String _formatDate(DateTime date) {
     const months = [
-      'januari',
-      'februari',
-      'maart',
-      'april',
-      'mei',
-      'juni',
-      'juli',
-      'augustus',
-      'september',
-      'oktober',
-      'november',
-      'december',
+      'januari', 'februari', 'maart', 'april', 'mei', 'juni',
+      'juli', 'augustus', 'september', 'oktober', 'november', 'december',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

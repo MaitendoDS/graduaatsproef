@@ -91,84 +91,85 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_isInitializing) {
-      return Scaffold(
-        backgroundColor: Colors.grey.shade50,
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.pink),
+@override
+Widget build(BuildContext context) {
+  if (_isInitializing) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.pink),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Cyclus gegevens laden...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
               ),
-              SizedBox(height: 16),
-              Text(
-                'Cyclus gegevens laden...',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  return Scaffold(
+    backgroundColor: Colors.grey.shade50,
+    body: RefreshIndicator(
+      onRefresh: _refreshData,
+      color: Colors.pink,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              CycleHeaderWidget(
+                selectedDay: _selectedDay,
+                cycleCalculator: _cycleCalculator,
+              ),
+              const SizedBox(height: 20),
+              CalendarLegend(
+                filters: _calendarFilters,
+                onFilterToggle: _toggleFilter,
+              ),
+              const SizedBox(height: 20),
+              TrackerCalendarWidget(
+                focusedDay: _focusedDay,
+                selectedDay: _selectedDay,
+                cycleCalculator: _cycleCalculator,
+                calendarFilters: _calendarFilters,
+                onDaySelected: _onDaySelected,
+                onPageChanged: _onPageChanged,
+              ),
+              const SizedBox(height: 20),
+              ActionButtons(
+                selectedDay: _selectedDay,
+                onSymptomsPressed: _navigateToSymptoms,
+                onMenstruationPressed: _navigateToMenstruation,
+                onFoodPressed: _navigateToFood,
+              ),
+              const SizedBox(height: 20),
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: EnhancedDayInfoCard(
+                  selectedDay: _selectedDay,
+                  cycleCalculator: _cycleCalculator,
+                  onMenstruationPressed: _navigateToMenstruation,
+                  onDataChanged: _refreshData, // ⭐ BELANGRIJK: Callback voor refresh
                 ),
               ),
             ],
           ),
         ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: RefreshIndicator(
-        onRefresh: _refreshData,
-        color: Colors.pink,
-        child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                CycleHeaderWidget(
-                  selectedDay: _selectedDay,
-                  cycleCalculator: _cycleCalculator,
-                ),
-                const SizedBox(height: 20),
-                CalendarLegend(
-                  filters: _calendarFilters,
-                  onFilterToggle: _toggleFilter,
-                ),
-                const SizedBox(height: 20),
-                TrackerCalendarWidget(
-                  focusedDay: _focusedDay,
-                  selectedDay: _selectedDay,
-                  cycleCalculator: _cycleCalculator,
-                  calendarFilters: _calendarFilters,
-                  onDaySelected: _onDaySelected,
-                  onPageChanged: _onPageChanged,
-                ),
-                const SizedBox(height: 20),
-                ActionButtons(
-                  selectedDay: _selectedDay,
-                  onSymptomsPressed: _navigateToSymptoms,
-                  onMenstruationPressed: _navigateToMenstruation,
-                  onFoodPressed: _navigateToFood,
-                ),
-                const SizedBox(height: 20),
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: EnhancedDayInfoCard(
-                    selectedDay: _selectedDay,
-                    cycleCalculator: _cycleCalculator,
-                    onMenstruationPressed: _navigateToMenstruation,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Future<void> _refreshData() async {
     await _initializeCalculator();
