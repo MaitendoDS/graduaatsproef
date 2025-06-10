@@ -4,12 +4,14 @@ class ActionButtons extends StatelessWidget {
   final DateTime selectedDay;
   final VoidCallback onSymptomsPressed;
   final VoidCallback onMenstruationPressed;
+  final VoidCallback onFoodPressed;
 
   const ActionButtons({
     super.key,
     required this.selectedDay,
     required this.onSymptomsPressed,
     required this.onMenstruationPressed,
+    required this.onFoodPressed,
   });
 
   @override
@@ -31,6 +33,25 @@ class ActionButtons extends StatelessWidget {
             icon: const Icon(Icons.healing),
             label: const Text(
               'Symptomen',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),const SizedBox(width: 12),
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: onFoodPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade100,
+              foregroundColor: Colors.green.shade800,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            icon: const Icon(Icons.apple),
+            label: const Text(
+              'Eten',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),

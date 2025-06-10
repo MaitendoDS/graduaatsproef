@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:health_tracker_unda/screens/food_tab.dart';
 import '../models/cycle_calculator.dart';
 import '../widgets/buttons/action_buttons.dart';
 import '../widgets/calendars/calendar_legend.dart';
@@ -150,6 +151,7 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
                   selectedDay: _selectedDay,
                   onSymptomsPressed: _navigateToSymptoms,
                   onMenstruationPressed: _navigateToMenstruation,
+                  onFoodPressed: _navigateToFood,
                 ),
                 const SizedBox(height: 20),
                 FadeTransition(
@@ -198,6 +200,21 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
       context,
       MaterialPageRoute(
         builder: (_) => MenstruationTab(selectedDay: _selectedDay),
+      ),
+    );
+    
+    // Refresh data if something was changed
+    if (result == true) {
+      await _refreshData();
+    }
+  }
+
+  
+  void _navigateToFood() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FoodTab(selectedDay: _selectedDay),
       ),
     );
     
