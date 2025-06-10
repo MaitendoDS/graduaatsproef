@@ -5,7 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../widgets/buttons/buttons.dart';
+import '../widgets/chip_selector.dart';
 import '../widgets/custom_text_field.dart';
+import '../widgets/icon_selector.dart';
 import '../widgets/section_container.dart';
 import '../widgets/time_selector.dart';
 
@@ -302,16 +304,26 @@ class _FoodTabState extends State<FoodTab> {
             const SizedBox(height: 24),
 
             // Maaltijd type Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Maaltijd type',
               icon: Icons.restaurant_menu,
               iconColor: Colors.orange.shade400,
-              child: buildIconSelector(
-                foodTypeOptions,
-                selectedFoodTypes,
-                Colors.orange.shade400,
-              ),
+              children: [
+                IconSelector(
+                  options: foodTypeOptions,
+                  initialSelection: selectedFoodTypes,
+                  baseColor: Colors.orange.shade400,
+                  allowMultipleSelection: true,
+                  onSelectionChanged: (selectedItems) {
+                    setState(() {
+                      selectedFoodTypes.clear();
+                      selectedFoodTypes.addAll(selectedItems);
+                    });
+                  },
+                ),
+              ],
             ),
+            
             const SizedBox(height: 16),
             // Tijd Card
             SectionContainer(
@@ -360,16 +372,24 @@ class _FoodTabState extends State<FoodTab> {
             const SizedBox(height: 16),
 
             // Allergenen Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Allergenen',
               icon: Icons.warning_amber,
               iconColor: Colors.red.shade400,
-              child: buildChipSelector(
-                allergenOptions,
-                selectedAllergens,
-                Colors.red.shade400,
-              ),
+              children: [
+                ChipSelector(
+                  options: allergenOptions,
+                  chipColor: Colors.red,
+                  onSelectionChanged: (selectedItems) {
+                    setState(() {
+                      selectedAllergens.clear();
+                      selectedAllergens.addAll(selectedItems);
+                    });
+                  },
+                ),
+              ],
             ),
+
             const SizedBox(height: 16),
             // Notities Card
             SectionContainer(

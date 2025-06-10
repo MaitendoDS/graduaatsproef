@@ -42,9 +42,6 @@ class CycleCalculator {
     _symptomsCache = await _firestoreService.getSymptomsForDateRange(startDate, endDate);
     _menstruationCache = await _firestoreService.getMenstruationForDateRange(startDate, endDate);
     _foodCache = await _firestoreService.getFoodForDateRange(startDate, endDate);
-    print('FoodCache keys: ${_foodCache.keys.toList()}');
-    print('SymptomsCache keys: ${_symptomsCache.keys.toList()}');
-    print('MenstruationCache keys: ${_menstruationCache.keys.toList()}');
   }
 
   // Check if day has menstruation data from Firestore

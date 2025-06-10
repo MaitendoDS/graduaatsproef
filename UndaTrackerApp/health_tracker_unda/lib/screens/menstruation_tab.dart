@@ -4,6 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../widgets/chip_selector.dart';
+import '../widgets/custom_text_field.dart';
+import '../widgets/icon_selector.dart';
+import '../widgets/section_container.dart';
+
 class MenstruationTab extends StatefulWidget {
   final DateTime selectedDay;
 
@@ -30,158 +35,103 @@ class _MenstruationTabState extends State<MenstruationTab> {
   ];
 
   final List<String> symptomOptions = [
-    'Ok', 'Krampen', 'Gevoelige borsten', 'Hoofdpijn', 'Vermoeid', 'Misselijk',
-    'Acne', 'Rugpijn', 'Opgeblazen', 'Slapeloos', 'Constipatie',
-    'Diarree', 'Duizelig', 'Bekkenpijn'
+    'Ok',
+    'Krampen',
+    'Gevoelige borsten',
+    'Hoofdpijn',
+    'Vermoeid',
+    'Misselijk',
+    'Acne',
+    'Rugpijn',
+    'Opgeblazen',
+    'Slapeloos',
+    'Constipatie',
+    'Diarree',
+    'Duizelig',
+    'Bekkenpijn',
   ];
 
   final List<String> dischargeAmounts = ['Geen', 'Licht', 'Gemiddeld', 'Zwaar'];
-  final List<String> dischargeTypes = ['Waterig', 'Slijmerig', 'Romig', 'Eiwit', 'Spotting', 'Abnormaal'];
+  final List<String> dischargeTypes = [
+    'Waterig',
+    'Slijmerig',
+    'Romig',
+    'Eiwit',
+    'Spotting',
+    'Abnormaal',
+  ];
   final List<String> otherOptions = ['Stress', 'Ziekte', 'Reizen'];
 
-  Widget buildStyledCard({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required Widget child,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade200,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: iconColor),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          child,
-        ],
-      ),
-    );
-  }
-
-  Widget buildChipSelector(List<String> options, Set<String> selectedSet, Color chipColor) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: options.map((option) {
-        final isSelected = selectedSet.contains(option);
-        return ChoiceChip(
-          label: Text(
-            option,
-            style: TextStyle(
-              color: isSelected ? Colors.white : chipColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          selected: isSelected,
-          onSelected: (selected) {
-            setState(() {
-              if (selected) {
-                selectedSet.add(option);
-              } else {
-                selectedSet.remove(option);
-              }
-            });
-          },
-          selectedColor: chipColor,
-          backgroundColor: chipColor.withOpacity(0.1),
-          side: BorderSide(
-            color: isSelected ? chipColor : chipColor.withOpacity(0.3),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget buildIconSelector(List<Map<String, dynamic>> options, Set<String> selectedSet, Color baseColor) {
+  Widget buildIconSelector(
+    List<Map<String, dynamic>> options,
+    Set<String> selectedSet,
+    Color baseColor,
+  ) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: options.map((option) {
-          final isSelected = selectedSet.contains(option['label']);
-          return Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (isSelected) {
-                    selectedSet.remove(option['label']);
-                  } else {
-                    selectedSet.add(option['label']);
-                  }
-                });
-              },
-              child: Column(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: isSelected ? baseColor : baseColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: isSelected ? baseColor : baseColor.withOpacity(0.3),
-                        width: 2,
+        children:
+            options.map((option) {
+              final isSelected = selectedSet.contains(option['label']);
+              return Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        selectedSet.remove(option['label']);
+                      } else {
+                        selectedSet.add(option['label']);
+                      }
+                    });
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected
+                                  ? baseColor
+                                  : baseColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color:
+                                isSelected
+                                    ? baseColor
+                                    : baseColor.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          option['icon'],
+                          color: isSelected ? Colors.white : baseColor,
+                          size: 24,
+                        ),
                       ),
-                    ),
-                    child: Icon(
-                      option['icon'], 
-                      color: isSelected ? Colors.white : baseColor,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: 80,
-                    child: Text(
-                      option['label'],
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? baseColor : Colors.grey.shade600,
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          option['label'],
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color:
+                                isSelected ? baseColor : Colors.grey.shade600,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -233,7 +183,10 @@ class _MenstruationTabState extends State<MenstruationTab> {
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('EEEE d MMMM y', 'nl').format(widget.selectedDay);
+    final formattedDate = DateFormat(
+      'EEEE d MMMM y',
+      'nl',
+    ).format(widget.selectedDay);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -249,82 +202,129 @@ class _MenstruationTabState extends State<MenstruationTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-             AppHeader(
+            AppHeader(
               title: 'Menstruatie',
               subtitle: formattedDate,
               icon: Icons.favorite,
               color: Colors.pink,
             ),
 
-
             const SizedBox(height: 24),
 
             // Seks Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Seks',
               icon: Icons.favorite_border,
               iconColor: Colors.purple.shade400,
-              child: buildIconSelector(sexOptions, selectedSexOptions, Colors.purple.shade400),
+              children: [
+                IconSelector(
+                  options: sexOptions,
+                  initialSelection: selectedSexOptions,
+                  baseColor: Colors.purple.shade400,
+                  allowMultipleSelection: true,
+                  onSelectionChanged: (selectedItems) {
+                    setState(() {
+                      selectedSexOptions.clear();
+                      selectedSexOptions.addAll(selectedItems);
+                    });
+                  },
+                ),
+              ],
             ),
-
+            const SizedBox(height: 16),
             // Symptomen Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Symptomen',
               icon: Icons.health_and_safety,
               iconColor: Colors.green.shade400,
-              child: buildChipSelector(symptomOptions, selectedSymptoms, Colors.green.shade400),
+              children: [
+                ChipSelector(
+                  options: symptomOptions,
+                  chipColor: Colors.green,
+                  onSelectionChanged: (selectedItems) {
+                    setState(() {
+                      selectedSymptoms.clear();
+                      selectedSymptoms.addAll(selectedItems);
+                    });
+                  },
+                ),
+              ],
             ),
-
+            const SizedBox(height: 16),
             // Vaginale afscheiding hoeveelheid Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Vaginale afscheiding',
               icon: Icons.water_drop,
               iconColor: Colors.red.shade400,
-              child: buildChipSelector(dischargeAmounts, selectedDischargeAmount, Colors.red.shade400),
+              children: [
+                ChipSelector(
+                  options: dischargeAmounts,
+                  chipColor: Colors.red,
+                  onSelectionChanged: (selectedItems) {
+                    setState(() {
+                      selectedDischargeAmount.clear();
+                      selectedDischargeAmount.addAll(selectedItems);
+                    });
+                  },
+                ),
+              ],
             ),
-
+            const SizedBox(height: 16),
             // Type vaginale afscheiding Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Type vaginale afscheiding',
               icon: Icons.category,
               iconColor: Colors.blueGrey.shade400,
-              child: buildChipSelector(dischargeTypes, selectedDischargeType, Colors.blueGrey.shade400),
+              children: [
+                ChipSelector(
+                  options: dischargeTypes,
+                  chipColor: Colors.blueGrey,
+                  onSelectionChanged: (selectedItems) {
+                    setState(() {
+                      selectedDischargeType.clear();
+                      selectedDischargeType.addAll(selectedItems);
+                    });
+                  },
+                ),
+              ],
             ),
 
+            const SizedBox(height: 16),
             // Overige Card
-            buildStyledCard(
+            SectionContainer(
               title: 'Overige',
               icon: Icons.more_horiz,
               iconColor: Colors.amber.shade400,
-              child: buildChipSelector(otherOptions, selectedOther, Colors.amber.shade400),
+              children: [
+                ChipSelector(
+                  options: otherOptions,
+                  chipColor: Colors.amber,
+                  onSelectionChanged: (selectedItems) {
+                    setState(() {
+                      selectedOther.clear();
+                      selectedOther.addAll(selectedItems);
+                    });
+                  },
+                ),
+              ],
             ),
+   const SizedBox(height: 16),
 
             // Notities Card
-            buildStyledCard(
-              title: 'Notities',
-              icon: Icons.note_alt,
-              iconColor: Colors.orange.shade400,
-              child: TextField(
-                controller: _notesController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: 'Voeg extra info toe...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.orange.shade400),
-                  ),
-                  contentPadding: const EdgeInsets.all(16),
-                ),
-              ),
+            SectionContainer(
+          title: 'Notities',
+          icon: Icons.note_alt,
+          iconColor: Colors.orange.shade400,
+          children: [
+            CustomTextField(
+              controller: _notesController,
+              hintText: 'Voeg extra info toe...',
+              maxLines: 4,
+              accentColor: Colors.orange,
             ),
+          ],
+        ),
+           
 
             const SizedBox(height: 16),
 
@@ -336,10 +336,7 @@ class _MenstruationTabState extends State<MenstruationTab> {
                 icon: const Icon(Icons.check, size: 20),
                 label: const Text(
                   "Menstruatiegegevens opslaan",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink.shade400,
@@ -353,7 +350,7 @@ class _MenstruationTabState extends State<MenstruationTab> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),
