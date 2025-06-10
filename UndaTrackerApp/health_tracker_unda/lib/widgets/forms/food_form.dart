@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:health_tracker_unda/widgets/headers/app_header.dart';
-import 'package:intl/intl.dart';
-
 import '../../constants/food_constants.dart';
 import '../../models/food_data.dart';
 import '../buttons/buttons.dart';
@@ -113,11 +110,7 @@ Future<void> _selectTime() async {
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat(
-      'EEEE d MMMM y',
-      'nl',
-    ).format(widget.selectedDay);
-
+  
     return SingleChildScrollView(
       padding: const EdgeInsets.all(FoodConstants.defaultPadding),
       child: Column(
