@@ -3,7 +3,6 @@ import 'tracking_tab.dart';
 import 'calendar_tab.dart';
 import 'notifications_tab.dart';
 import 'settings_tab.dart';
-import 'food_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

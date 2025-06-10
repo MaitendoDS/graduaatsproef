@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../models/symptom_data.dart';
 import '../services/symptom_service.dart';
 import '../widgets/buttons/buttons.dart';
-import '../widgets/symptom_form.dart';
+import '../widgets/forms/symptom_form.dart';
 
 class SymptomsTab extends StatefulWidget {
   final DateTime selectedDay;

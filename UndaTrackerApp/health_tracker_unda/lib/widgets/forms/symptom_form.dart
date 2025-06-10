@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../constants/symptom_constants.dart';
-import '../models/symptom_data.dart';
-import 'custom_text_field.dart';
-import 'painscale_slider.dart';
-import 'section_container.dart';
-import 'symptom_type_selector.dart';
-import 'time_selector.dart';
+import '../../constants/symptom_constants.dart';
+import '../../models/symptom_data.dart';
+import '../custom_text_field.dart';
+import '../painscale_slider.dart';
+import '../section_container.dart';
+import '../symptom_type_selector.dart';
+import '../time_selector.dart';
 
 class SymptomForm extends StatefulWidget {
   final DateTime selectedDay;
