@@ -65,17 +65,25 @@ class _FoodFormState extends State<FoodForm> {
     super.dispose();
   }
 
-  Future<void> _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime,
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedTime = picked;
-      });
-    }
+Future<void> _selectTime() async {
+  final TimeOfDay? picked = await showTimePicker(
+    context: context,
+    initialTime: _selectedTime,
+    builder: (BuildContext context, Widget? child) {
+      return MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          alwaysUse24HourFormat: true,  // Dit zorgt voor 24u format
+        ),
+        child: child!,
+      );
+    },
+  );
+  if (picked != null) {
+    setState(() {
+      _selectedTime = picked;
+    });
   }
+}
 
   void _handleSave() {
     final foodData = FoodData(
