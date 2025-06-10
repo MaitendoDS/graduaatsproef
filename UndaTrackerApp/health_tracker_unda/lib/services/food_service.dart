@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'food_data.dart';
+
+import '../models/food_data.dart';
 
 class FoodService {
   static const String _collection = 'voeding';
