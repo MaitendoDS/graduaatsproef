@@ -12,6 +12,7 @@ class CycleCalculator {
   
   // Cache for symptoms and menstruation data
   Map<String, List<Map<String, dynamic>>> _symptomsCache = {};
+  Map<String, List<Map<String, dynamic>>> _foodCache = {};
   Map<String, Map<String, dynamic>> _menstruationCache = {};
   
   // Getters
@@ -40,6 +41,10 @@ class CycleCalculator {
   Future<void> loadDataForDateRange(DateTime startDate, DateTime endDate) async {
     _symptomsCache = await _firestoreService.getSymptomsForDateRange(startDate, endDate);
     _menstruationCache = await _firestoreService.getMenstruationForDateRange(startDate, endDate);
+    _foodCache = await _firestoreService.getFoodForDateRange(startDate, endDate);
+    print('FoodCache keys: ${_foodCache.keys.toList()}');
+    print('SymptomsCache keys: ${_symptomsCache.keys.toList()}');
+    print('MenstruationCache keys: ${_menstruationCache.keys.toList()}');
   }
 
   // Check if day has menstruation data from Firestore
@@ -80,6 +85,11 @@ class CycleCalculator {
   List<Map<String, dynamic>> getSymptomsForDay(DateTime day) {
     String dateKey = '${day.year}-${day.month}-${day.day}';
     return _symptomsCache[dateKey] ?? [];
+  }
+
+  List<Map<String, dynamic>> getFoodForDay(DateTime day) {
+    String dateKey = '${day.year}-${day.month}-${day.day}';
+    return _foodCache[dateKey] ?? [];
   }
 
   Map<String, dynamic>? getMenstruationForDay(DateTime day) {

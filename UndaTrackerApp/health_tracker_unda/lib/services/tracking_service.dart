@@ -101,6 +101,30 @@ Future<List<DateTime>> getAllMenstruationDates() async {
     return [];
   }
 }
+Future<Map<String, List<Map<String, dynamic>>>> getFoodForDateRange(DateTime start, DateTime end) async {
+  final snapshot = await _firestore
+    .collection('voeding')
+    .where('datum', isGreaterThanOrEqualTo: start)
+    .where('datum', isLessThanOrEqualTo: end)
+    .get();
+
+  Map<String, List<Map<String, dynamic>>> foodByDate = {};
+
+  for (var doc in snapshot.docs) {
+    final data = doc.data();
+    DateTime datum = (data['datum'] as Timestamp).toDate();
+    String key = '${datum.year}-${datum.month}-${datum.day}';
+
+    if (!foodByDate.containsKey(key)) {
+      foodByDate[key] = [];
+    }
+
+    foodByDate[key]!.add(data);
+  }
+
+  return foodByDate;
+}
+
 
   // Get symptoms for date range (for calendar display)
   Future<Map<String, List<Map<String, dynamic>>>> getSymptomsForDateRange(

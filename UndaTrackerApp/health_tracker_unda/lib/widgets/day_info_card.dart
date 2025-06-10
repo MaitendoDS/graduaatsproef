@@ -21,6 +21,7 @@ class EnhancedDayInfoCard extends StatefulWidget {
 class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
   List<Map<String, dynamic>> _symptoms = [];
   Map<String, dynamic>? _menstruationData;
+  List<Map<String, dynamic>> _foodItems = [];
   bool _isLoading = true;
 
   @override
@@ -44,7 +45,8 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
     _menstruationData = widget.cycleCalculator.getMenstruationForDay(
       widget.selectedDay,
     );
-
+    _foodItems = widget.cycleCalculator.getFoodForDay(widget.selectedDay);
+    print('FoodItems voor ${widget.selectedDay}: $_foodItems');
     setState(() => _isLoading = false);
   }
 
@@ -69,6 +71,10 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
         ],
         if (_menstruationData == null && _symptoms.isEmpty)
           _buildEmptyStateSection(),
+        if (_foodItems.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildFoodSection(),
+        ],
       ],
     );
   }
@@ -103,10 +109,7 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
       iconColor: Colors.pink,
       children: [
         if (_menstruationData!['sexOptions'] != null)
-          _buildInfoRow(
-            'Seks',
-            _menstruationData!['sexOptions'].toString(),
-          ),
+          _buildInfoRow('Seks', _menstruationData!['sexOptions'].toString()),
         if (_menstruationData!['symptoms'] != null &&
             _menstruationData!['symptoms'].isNotEmpty)
           _buildInfoRow('Symptomen', _menstruationData!['symptoms'].join(', ')),
@@ -145,6 +148,15 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
       icon: Icons.healing,
       iconColor: Colors.orange,
       children: [..._symptoms.map((symptom) => _buildSymptomCard(symptom))],
+    );
+  }
+
+  Widget _buildFoodSection() {
+    return SectionContainer(
+      title: 'Voeding',
+      icon: Icons.restaurant_menu,
+      iconColor: Colors.green,
+      children: _foodItems.map((food) => _buildFoodCard(food)).toList(),
     );
   }
 
@@ -200,6 +212,57 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
             const SizedBox(height: 8),
             Text('Notities: ${symptom['notities']}'),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFoodCard(Map<String, dynamic> food) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.restaurant, color: Colors.green.shade700, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                food['wat'] ?? 'Onbekend gerecht',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
+              ),
+              const Spacer(),
+              if (food['tijd'] != null)
+                Text(
+                  food['tijd'].toString(),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+            ],
+          ),
+          if (food['ingredienten'] != null && food['ingredienten'].isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text('Ingrediënten: ${food['ingredienten']}'),
+            ),
+          if (food['allergenen'] != null && food['allergenen'].isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text('Allergenen: ${food['allergenen'].join(", ")}'),
+            ),
+          if (food['notities'] != null && food['notities'].isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text('Notities: ${food['notities']}'),
+            ),
         ],
       ),
     );

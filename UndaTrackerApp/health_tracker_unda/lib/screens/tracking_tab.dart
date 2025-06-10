@@ -173,7 +173,7 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
   Future<void> _refreshData() async {
     await _initializeCalculator();
     
-    // Reload calendar data for current month
+    // Reload calendar data voor maand
     DateTime firstDay = DateTime(_focusedDay.year, _focusedDay.month, 1);
     DateTime lastDay = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
     await _cycleCalculator.loadDataForDateRange(firstDay, lastDay);
@@ -189,7 +189,7 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
       ),
     );
     
-    // Refresh data if something was changed
+    // Refresh data als iets verandert
     if (result == true) {
       await _refreshData();
     }
@@ -203,7 +203,7 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
       ),
     );
     
-    // Refresh data if something was changed
+    // Refresh data als iets verandert
     if (result == true) {
       await _refreshData();
     }
@@ -218,7 +218,7 @@ class _TrackingTabState extends State<TrackingTab> with TickerProviderStateMixin
       ),
     );
     
-    // Refresh data if something was changed
+    // Refresh data als iets verandert
     if (result == true) {
       await _refreshData();
     }
