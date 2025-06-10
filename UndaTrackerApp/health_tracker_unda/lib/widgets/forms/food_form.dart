@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../../constants/food_constants.dart';
 import '../../models/food_data.dart';
 import '../buttons/buttons.dart';
-import '../chip_selector.dart';
-import '../custom_text_field.dart';
-import '../icon_selector.dart';
+import '../fields/chip_selector.dart';
+import '../fields/custom_text_field.dart';
+import '../fields/icon_selector.dart';
 import '../section_container.dart';
-import '../time_selector.dart';
+import '../fields/time_selector.dart';
 
 class FoodForm extends StatefulWidget {
   final DateTime selectedDay;

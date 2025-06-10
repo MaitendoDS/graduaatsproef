@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/menstruation_data.dart';
-import '../chip_selector.dart';
-import '../custom_text_field.dart';
-import '../icon_selector.dart';
+import '../fields/chip_selector.dart';
+import '../fields/custom_text_field.dart';
+import '../fields/icon_selector.dart';
 import '../section_container.dart';
 
 class MenstruationSections extends StatelessWidget {

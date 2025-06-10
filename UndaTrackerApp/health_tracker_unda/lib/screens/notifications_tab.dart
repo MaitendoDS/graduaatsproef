@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:health_tracker_unda/widgets/headers/app_header.dart';
 import 'package:health_tracker_unda/widgets/section_container.dart';
-import 'package:health_tracker_unda/widgets/switch_field.dart';
+import 'package:health_tracker_unda/widgets/fields/switch_field.dart';
 
 class NotificationsTab extends StatefulWidget {
   const NotificationsTab({super.key});
