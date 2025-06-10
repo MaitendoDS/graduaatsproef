@@ -32,16 +32,22 @@ class SymptomService {
     }
   }
     // DELETE METHOD
-  static Future<void> deleteSymptom(String documentId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('symptomen')
-          .doc(documentId)
-          .delete();
-    } catch (e) {
-      throw Exception('Fout bij verwijderen symptoom: $e');
+
+static Future<void> deleteSymptom(String documentId) async {
+  try {
+    final docRef = _firestore.collection('symptomen').doc(documentId);
+    
+    final docSnapshot = await docRef.get();
+    if (!docSnapshot.exists) {
+      throw Exception('Symptoom bestaat niet meer');
     }
+    
+    await docRef.delete();
+  } catch (e) {
+    throw Exception('Fout bij verwijderen symptoom: $e');
   }
+}
+
 
   // UPDATE METHOD
   static Future<String?> updateSymptom(String documentId, SymptomData symptomData) async {

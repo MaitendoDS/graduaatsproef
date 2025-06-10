@@ -88,80 +88,72 @@ class FoodData {
     };
   }
 
-  // FIXED: Create from Firestore document with proper time parsing
-  factory FoodData.fromFirestore(
-    Map<String, dynamic> data,
-    BuildContext context,
-  ) {
-    // Parse time correctly - handle both 12-hour and 24-hour formats
-    TimeOfDay parsedTime = TimeOfDay.now();
-    
-    if (data['tijd'] != null) {
-      try {
-        String timeString = data['tijd'].toString();
-        
-        // Check if it's in 12-hour format (contains AM/PM)
-        if (timeString.toLowerCase().contains('am') || timeString.toLowerCase().contains('pm')) {
-          // Parse 12-hour format like "2:47 PM"
-          final dateFormat = DateFormat('h:mm a');
-          final dateTime = dateFormat.parse(timeString);
-          parsedTime = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
-        } else {
-          // Parse 24-hour format like "14:47" or "2:47"
-          final parts = timeString.split(':');
-          if (parts.length >= 2) {
-            final hour = int.tryParse(parts[0]) ?? TimeOfDay.now().hour;
-            final minute = int.tryParse(parts[1]) ?? TimeOfDay.now().minute;
-            parsedTime = TimeOfDay(hour: hour, minute: minute);
-          }
+factory FoodData.fromFirestore(
+  Map<String, dynamic> data,
+  BuildContext context,
+) {
+  TimeOfDay parsedTime = TimeOfDay.now();
+  
+  if (data['tijd'] != null) {
+    try {
+      String timeString = data['tijd'].toString();
+      
+      if (timeString.toLowerCase().contains('am') || timeString.toLowerCase().contains('pm')) {
+        final dateFormat = DateFormat('h:mm a');
+        final dateTime = dateFormat.parse(timeString);
+        parsedTime = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+      } else {
+        final parts = timeString.split(':');
+        if (parts.length >= 2) {
+          final hour = int.tryParse(parts[0]) ?? TimeOfDay.now().hour;
+          final minute = int.tryParse(parts[1]) ?? TimeOfDay.now().minute;
+          parsedTime = TimeOfDay(hour: hour, minute: minute);
         }
-      } catch (e) {
-        print('Error parsing time "${data['tijd']}": $e');
-        // Use current time as fallback
-        parsedTime = TimeOfDay.now();
       }
+    } catch (e) {
+      parsedTime = TimeOfDay.now();
     }
-
-    return FoodData(
-      selectedDay: (data['datum'] as Timestamp).toDate(),
-      selectedTime: parsedTime,
-      selectedFoodTypes: Set<String>.from(data['foodTypes'] ?? []),
-      food: data['wat'] ?? '',
-      ingredients: data['ingredienten'] ?? '',
-      selectedAllergens: Set<String>.from(data['allergenen'] ?? []),
-      notes: data['notities'] ?? '',
-      context: context,
-    );
   }
 
-  @override
-  String toString() {
-    return 'FoodData{selectedDay: $selectedDay, selectedTime: $selectedTime, '
-        'selectedFoodTypes: $selectedFoodTypes, food: $food, '
-        'ingredients: $ingredients, selectedAllergens: $selectedAllergens, '
-        'notes: $notes}';
-  }
+  return FoodData(
+    selectedDay: (data['datum'] as Timestamp).toDate(),
+    selectedTime: parsedTime,
+    selectedFoodTypes: Set<String>.from(data['foodTypes'] ?? []),
+    food: data['wat'] ?? '',
+    ingredients: data['ingredienten'] ?? '',
+    selectedAllergens: Set<String>.from(data['allergenen'] ?? []),
+    notes: data['notities'] ?? '',
+    context: context,
+  );}
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is FoodData &&
-          runtimeType == other.runtimeType &&
-          selectedDay == other.selectedDay &&
-          selectedTime == other.selectedTime &&
-          selectedFoodTypes == other.selectedFoodTypes &&
-          food == other.food &&
-          ingredients == other.ingredients &&
-          selectedAllergens == other.selectedAllergens &&
-          notes == other.notes;
+  // @override
+  // String toString() {
+  //   return 'FoodData{selectedDay: $selectedDay, selectedTime: $selectedTime, '
+  //       'selectedFoodTypes: $selectedFoodTypes, food: $food, '
+  //       'ingredients: $ingredients, selectedAllergens: $selectedAllergens, '
+  //       'notes: $notes}';
+  // }
 
-  @override
-  int get hashCode =>
-      selectedDay.hashCode ^
-      selectedTime.hashCode ^
-      selectedFoodTypes.hashCode ^
-      food.hashCode ^
-      ingredients.hashCode ^
-      selectedAllergens.hashCode ^
-      notes.hashCode;
+  // @override
+  // bool operator ==(Object other) =>
+  //     identical(this, other) ||
+  //     other is FoodData &&
+  //         runtimeType == other.runtimeType &&
+  //         selectedDay == other.selectedDay &&
+  //         selectedTime == other.selectedTime &&
+  //         selectedFoodTypes == other.selectedFoodTypes &&
+  //         food == other.food &&
+  //         ingredients == other.ingredients &&
+  //         selectedAllergens == other.selectedAllergens &&
+  //         notes == other.notes;
+
+  // @override
+  // int get hashCode =>
+  //     selectedDay.hashCode ^
+  //     selectedTime.hashCode ^
+  //     selectedFoodTypes.hashCode ^
+  //     food.hashCode ^
+  //     ingredients.hashCode ^
+  //     selectedAllergens.hashCode ^
+  //     notes.hashCode;
 }

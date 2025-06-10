@@ -48,74 +48,70 @@ class _EnhancedDayInfoCardState extends State<EnhancedDayInfoCard> {
     }
   }
 
-  Future<void> _loadDayData() async {
-    setState(() => _isLoading = true);
+Future<void> _loadDayData() async {
+  setState(() => _isLoading = true);
 
-    _symptoms = widget.cycleCalculator.getSymptomsForDay(widget.selectedDay);
-    _menstruationData = widget.cycleCalculator.getMenstruationForDay(widget.selectedDay);
-    _foodItems = widget.cycleCalculator.getFoodForDay(widget.selectedDay);
-    
-    setState(() => _isLoading = false);
-  }
+  _symptoms = widget.cycleCalculator.getSymptomsForDay(widget.selectedDay);
+  _menstruationData = widget.cycleCalculator.getMenstruationForDay(widget.selectedDay);
+  _foodItems = widget.cycleCalculator.getFoodForDay(widget.selectedDay);
+  
+  setState(() => _isLoading = false);
+}
 
   // ===== DELETE METHODS =====
-  
-Future<void> _deleteFood(String foodId, String foodName) async {
-  print('Delete food called with ID: $foodId, Name: $foodName'); // Debug log
-  
+  Future<void> _deleteFood(String foodId, String foodName) async {
   final confirm = await _showDeleteDialog('voedingsitem', foodName);
-  if (confirm != true) {
-    print('Delete cancelled by user'); // Debug log
-    return;
-  }
+  if (confirm != true) return;
 
   try {
-    print('Calling FoodService.deleteFoodEntry...'); // Debug log
     await FoodService.deleteFoodEntry(foodId);
-    print('Delete successful, showing success message'); // Debug log
-    
     if (mounted) {
       _showSuccessMessage('Voedingsitem verwijderd');
       await _refreshData();
     }
   } catch (e) {
-    print('Delete failed with error: $e'); // Debug log
     if (mounted) {
       _showErrorMessage('Fout bij verwijderen: $e');
     }
   }
 }
-  Future<void> _deleteSymptom(String symptomId, String symptomType) async {
-    final confirm = await _showDeleteDialog('symptoom', symptomType);
-    if (confirm != true) return;
 
-    try {
-      await SymptomService.deleteSymptom(symptomId);
+Future<void> _deleteSymptom(String symptomId, String symptomType) async {
+  final confirm = await _showDeleteDialog('symptoom', symptomType);
+  if (confirm != true) return;
+
+  try {
+    await SymptomService.deleteSymptom(symptomId);
+    if (mounted) {
       _showSuccessMessage('Symptoom verwijderd');
       await _refreshData();
-    } catch (e) {
+    }
+  } catch (e) {
+    if (mounted) {
       _showErrorMessage('Fout bij verwijderen: $e');
     }
   }
+}
 
-  Future<void> _deleteMenstruation(String menstruationId) async {
-    final confirm = await _showDeleteDialog('menstruatie data', '');
-    if (confirm != true) return;
+Future<void> _deleteMenstruation(String menstruationId) async {
+  final confirm = await _showDeleteDialog('menstruatie data', '');
+  if (confirm != true) return;
 
-    try {
-      await MenstruationService.deleteMenstruation(menstruationId);
+  try {
+    await MenstruationService.deleteMenstruation(menstruationId);
+    if (mounted) {
       _showSuccessMessage('Menstruatie data verwijderd');
       await _refreshData();
-    } catch (e) {
+    }
+  } catch (e) {
+    if (mounted) {
       _showErrorMessage('Fout bij verwijderen: $e');
     }
   }
+}
 
   // ===== EDIT METHODS =====
-  
-Future<void> _editFood(Map<String, dynamic> foodData) async {
-  print('Edit food called with data: $foodData'); // Debug log
-  
+  Future<void> _editFood(Map<String, dynamic> foodData) async {
   try {
     final result = await Navigator.push(
       context,
@@ -129,20 +125,18 @@ Future<void> _editFood(Map<String, dynamic> foodData) async {
       ),
     );
     
-    print('Edit result: $result'); // Debug log
-    
     if (result == true) {
       await _refreshData();
     }
   } catch (e) {
-    print('Edit failed with error: $e'); // Debug log
     if (mounted) {
       _showErrorMessage('Fout bij bewerken: $e');
     }
   }
 }
 
-  Future<void> _editSymptom(Map<String, dynamic> symptomData) async {
+Future<void> _editSymptom(Map<String, dynamic> symptomData) async {
+  try {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -158,9 +152,15 @@ Future<void> _editFood(Map<String, dynamic> foodData) async {
     if (result == true) {
       await _refreshData();
     }
+  } catch (e) {
+    if (mounted) {
+      _showErrorMessage('Fout bij bewerken: $e');
+    }
   }
+}
 
-  Future<void> _editMenstruation(Map<String, dynamic> menstruationData) async {
+Future<void> _editMenstruation(Map<String, dynamic> menstruationData) async {
+  try {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -176,8 +176,12 @@ Future<void> _editFood(Map<String, dynamic> foodData) async {
     if (result == true) {
       await _refreshData();
     }
+  } catch (e) {
+    if (mounted) {
+      _showErrorMessage('Fout bij bewerken: $e');
+    }
   }
-
+}
   // ===== UTILITY METHODS =====
   
   Future<bool?> _showDeleteDialog(String itemType, String itemName) {
@@ -463,7 +467,6 @@ Widget _buildFoodCard(Map<String, dynamic> food) {
   final foodId = food['id'];
   final foodName = food['wat'] ?? 'Onbekend gerecht';
   
-  print('Building food card with ID: $foodId, Name: $foodName'); // Debug log
   
   return Container(
     margin: const EdgeInsets.only(bottom: 12),
@@ -495,24 +498,6 @@ Widget _buildFoodCard(Map<String, dynamic> food) {
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
           ],
-        ),
-        
-        // Debug info (je kunt dit later verwijderen)
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            'Debug - ID: $foodId',
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.grey.shade600,
-              fontFamily: 'monospace',
-            ),
-          ),
         ),
         
         // Food details

@@ -106,7 +106,7 @@ Future<Map<String, List<Map<String, dynamic>>>> getFoodForDateRange(DateTime sta
   if (currentUserId == null) return {};
   
   try {
-    final snapshot = await FirebaseFirestore.instance
+    final snapshot = await _firestore
       .collection('voeding')
       .where('uid', isEqualTo: currentUserId)
       .where('datum', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
@@ -124,23 +124,18 @@ Future<Map<String, List<Map<String, dynamic>>>> getFoodForDateRange(DateTime sta
         foodByDate[key] = [];
       }
 
-      // ⭐ BELANGRIJK: Voeg document ID toe aan data
-      final foodData = {
-        'id': doc.id,  // Document ID toevoegen!
-        ...data,       // Alle andere data
-      };
-
-      foodByDate[key]!.add(foodData);
-      
-      print('Added food item with ID: ${doc.id}'); // Debug log
+      foodByDate[key]!.add({
+        'id': doc.id,
+        ...data,
+      });
     }
 
     return foodByDate;
   } catch (e) {
-    print('Error getting food for date range: $e');
     return {};
   }
 }
+
 Future<Map<String, List<Map<String, dynamic>>>> getSymptomsForDateRange(
   DateTime startDate, 
   DateTime endDate
@@ -148,7 +143,7 @@ Future<Map<String, List<Map<String, dynamic>>>> getSymptomsForDateRange(
   if (currentUserId == null) return {};
   
   try {
-    QuerySnapshot query = await FirebaseFirestore.instance
+    QuerySnapshot query = await _firestore
         .collection('symptomen')
         .where('uid', isEqualTo: currentUserId)
         .where('datum', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
@@ -166,18 +161,14 @@ Future<Map<String, List<Map<String, dynamic>>>> getSymptomsForDateRange(
         symptomsMap[dateKey] = [];
       }
       
-      // ⭐ BELANGRIJK: Voeg document ID toe
       symptomsMap[dateKey]!.add({
-        'id': doc.id,  // Document ID toevoegen!
+        'id': doc.id,
         ...data
       });
-      
-      print('Added symptom with ID: ${doc.id}'); // Debug log
     }
     
     return symptomsMap;
   } catch (e) {
-    print('Error getting symptoms for date range: $e');
     return {};
   }
 }
@@ -189,7 +180,7 @@ Future<Map<String, Map<String, dynamic>>> getMenstruationForDateRange(
   if (currentUserId == null) return {};
   
   try {
-    QuerySnapshot query = await FirebaseFirestore.instance
+    QuerySnapshot query = await _firestore
         .collection('menstruatie')
         .where('uid', isEqualTo: currentUserId)
         .where('datum', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
@@ -203,18 +194,14 @@ Future<Map<String, Map<String, dynamic>>> getMenstruationForDateRange(
       DateTime date = (data['datum'] as Timestamp).toDate();
       String dateKey = '${date.year}-${date.month}-${date.day}';
       
-      // ⭐ BELANGRIJK: Voeg document ID toe
       menstruationMap[dateKey] = {
-        'id': doc.id,  // Document ID toevoegen!
+        'id': doc.id,
         ...data
       };
-      
-      print('Added menstruation with ID: ${doc.id}'); // Debug log
     }
     
     return menstruationMap;
   } catch (e) {
-    print('Error getting menstruation for date range: $e');
     return {};
   }
 }

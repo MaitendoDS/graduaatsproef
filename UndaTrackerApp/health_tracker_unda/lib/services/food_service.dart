@@ -56,62 +56,47 @@ class FoodService {
         .toList();
   }
 
-  // FIXED: Delete method with proper error handling
-  static Future<void> deleteFoodEntry(String documentId) async {
-    try {
-      print('Attempting to delete food entry: $documentId'); // Debug log
-      
-      final docRef = FirebaseFirestore.instance.collection(_collection).doc(documentId);
-      
-      // Check if document exists first
-      final docSnapshot = await docRef.get();
-      if (!docSnapshot.exists) {
-        throw Exception('Voedingsitem bestaat niet meer');
-      }
-      
-      // Delete the document
-      await docRef.delete();
-      
-      print('Successfully deleted food entry: $documentId'); // Debug log
-    } catch (e) {
-      print('Error deleting food entry: $e'); // Debug log
-      throw Exception('Fout bij verwijderen voedingsitem: $e');
+  
+static Future<void> deleteFoodEntry(String documentId) async {
+  try {
+    final docRef = FirebaseFirestore.instance.collection(_collection).doc(documentId);
+    
+    final docSnapshot = await docRef.get();
+    if (!docSnapshot.exists) {
+      throw Exception('Voedingsitem bestaat niet meer');
     }
+    
+    await docRef.delete();
+  } catch (e) {
+    throw Exception('Fout bij verwijderen voedingsitem: $e');
+  }
+}
+
+static Future<void> updateFoodEntry(String documentId, FoodData foodData) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    throw Exception('Geen gebruiker ingelogd');
   }
 
-  // FIXED: Update method with consistent time format
-  static Future<void> updateFoodEntry(
-    String documentId,
-    FoodData foodData,
-  ) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      throw Exception('Geen gebruiker ingelogd');
-    }
+  try {
+    final data = {
+      'datum': Timestamp.fromDate(foodData.selectedDay),
+      'tijd': _formatTime(foodData.selectedTime),
+      'foodTypes': foodData.selectedFoodTypes.toList(),
+      'wat': foodData.food.trim(),
+      'ingredienten': foodData.ingredients.trim(),
+      'allergenen': foodData.selectedAllergens.toList(),
+      'notities': foodData.notes.trim(),
+      'bijgewerktOp': FieldValue.serverTimestamp(),
+    };
 
-    try {
-      print('Attempting to update food entry: $documentId'); // Debug log
-      
-      final data = {
-        'datum': Timestamp.fromDate(foodData.selectedDay),
-        'tijd': _formatTime(foodData.selectedTime), // Gebruik helper method
-        'foodTypes': foodData.selectedFoodTypes.toList(),
-        'wat': foodData.food.trim(),
-        'ingredienten': foodData.ingredients.trim(),
-        'allergenen': foodData.selectedAllergens.toList(),
-        'notities': foodData.notes.trim(),
-        'bijgewerktOp': FieldValue.serverTimestamp(),
-      };
-
-      await FirebaseFirestore.instance
-          .collection(_collection)
-          .doc(documentId)
-          .update(data);
-          
-      print('Successfully updated food entry: $documentId'); // Debug log
-    } catch (e) {
-      print('Error updating food entry: $e'); // Debug log
-      throw Exception('Fout bij bijwerken voedingsitem: $e');
-    }
+    await FirebaseFirestore.instance
+        .collection(_collection)
+        .doc(documentId)
+        .update(data);
+  } catch (e) {
+    throw Exception('Fout bij bijwerken voedingsitem: $e');
   }
+}
+
 }
