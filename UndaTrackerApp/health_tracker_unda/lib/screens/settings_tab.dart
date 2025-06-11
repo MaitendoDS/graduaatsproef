@@ -7,6 +7,7 @@ import 'package:health_tracker_unda/widgets/fields/switch_field.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/pdf_report_service.dart';
 import 'welcome_screen.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -107,6 +108,103 @@ class _SettingsTabState extends State<SettingsTab> {
         birthDate = picked;
         _hasChanges = true;
       });
+    }
+  }
+
+  Future<void> _generateHealthReport() async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            const Text('Rapport genereren...'),
+            const SizedBox(height: 8),
+            Text(
+              'Dit kan even duren',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final pdfBytes = await PdfReportService.generateHealthReport();
+      
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        
+        // Show options dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                Icon(Icons.picture_as_pdf, color: Colors.red.shade400),
+                const SizedBox(width: 8),
+                const Text('Rapport Gereed'),
+              ],
+            ),
+            content: const Text(
+              'Je gezondheidsrapport is succesvol gegenereerd. Wat wil je ermee doen?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Annuleren',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await PdfReportService.sharePdf(pdfBytes);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade400,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Delen'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await PdfReportService.printPdf(pdfBytes);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade400,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Printen'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fout bij genereren rapport: $e'),
+            backgroundColor: Colors.red.shade400,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
     }
   }
 
@@ -218,7 +316,6 @@ class _SettingsTabState extends State<SettingsTab> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -325,7 +422,7 @@ class _SettingsTabState extends State<SettingsTab> {
                   label: 'Rapport voor huisarts',
                   icon: Icons.picture_as_pdf,
                   color: Colors.teal.shade300,
-                  onPressed: () {},
+                  onPressed: _generateHealthReport,
                 ),
 
                 const SizedBox(height: 12),

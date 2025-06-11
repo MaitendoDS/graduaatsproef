@@ -222,18 +222,18 @@ class CycleCalculator {
       );
     }
 
-    // Show predicted menstruation with different styling
-    if (isPredictedMenstruation && (filters['menstruation'] ?? true)) {
-      return _buildCalendarDayContainer(
-        day: day,
-        color: Colors.pink.shade100,
-        icon: Icons.water_drop_outlined,
-        textColor: Colors.pink.shade700,
-        hasBorder: true,
-        borderColor: Colors.pink.shade300,
-        showSymptomsIcon: hasSymptomsToday && (filters['symptoms'] ?? true),
-      );
-    }
+    // // Show predicted menstruation with different styling
+    // if (isPredictedMenstruation && (filters['menstruation'] ?? true)) {
+    //   return _buildCalendarDayContainer(
+    //     day: day,
+    //     color: Colors.pink.shade100,
+    //     icon: Icons.water_drop_outlined,
+    //     textColor: Colors.pink.shade700,
+    //     hasBorder: true,
+    //     borderColor: Colors.pink.shade300,
+    //     showSymptomsIcon: hasSymptomsToday && (filters['symptoms'] ?? true),
+    //   );
+    // }
 
     if (isOvulation && (filters['ovulation'] ?? true)) {
       return _buildCalendarDayContainer(
