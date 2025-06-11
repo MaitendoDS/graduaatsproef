@@ -160,7 +160,7 @@ Widget build(BuildContext context) {
                   selectedDay: _selectedDay,
                   cycleCalculator: _cycleCalculator,
                   onMenstruationPressed: _navigateToMenstruation,
-                  onDataChanged: _refreshData, // ⭐ BELANGRIJK: Callback voor refresh
+                  onDataChanged: _refreshData, // Callback voor refresh
                 ),
               ),
             ],

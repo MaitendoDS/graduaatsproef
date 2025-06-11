@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'tracking_tab.dart';
-import 'calendar_tab.dart';
 import 'notifications_tab.dart';
 import 'settings_tab.dart';
 
@@ -12,13 +11,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 1; // Tracking-tab als starttabblad
+  int _selectedIndex = 0; // Tracking-tab als starttabblad
   Map<String, dynamic>? userSettings;
 
   final List<Widget> _tabs = [
-    const CalendarTab(),
     const TrackingTab(),
-    // const FoodTab(),
     const NotificationsTab(),
     const SettingsTab(),
   ];
@@ -63,16 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Kalender',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.track_changes),
             label: 'Tracking',
           ),
-          // BottomNavigationBarItem(
-          // icon: Icon(Icons.restaurant),
-          // label: 'Eten'),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
             label: 'Meldingen',
