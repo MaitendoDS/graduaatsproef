@@ -147,7 +147,7 @@ class _NotificationsTabState extends State<NotificationsTab> {
                   title: 'Ovulatie',
                   subtitle: 'Krijg een melding tijdens je vruchtbare periode',
                   icon: Icons.circle,
-                  value: menstruationReminder,
+                  value: ovulationReminder,
                   onChanged: (val) => setState(() => ovulationReminder = val),
                   activeColor: Colors.pink.shade400,
                 ),
