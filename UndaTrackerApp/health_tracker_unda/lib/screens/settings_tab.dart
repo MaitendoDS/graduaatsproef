@@ -428,15 +428,6 @@ class _SettingsTabState extends State<SettingsTab> {
                 const SizedBox(height: 12),
 
                 ActionButton(
-                  label: 'Tips',
-                  icon: Icons.lightbulb,
-                  color: Colors.amber.shade300,
-                  onPressed: () {},
-                ),
-
-                const SizedBox(height: 12),
-
-                ActionButton(
                   label: 'Log uit',
                   icon: Icons.logout,
                   color: Colors.red.shade400,
